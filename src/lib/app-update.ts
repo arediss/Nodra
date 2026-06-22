@@ -29,7 +29,7 @@ let pending: Update | null = null;
 
 const msg = (e: unknown) => (e instanceof Error ? e.message : String(e));
 
-export const useAppUpdate = create<AppUpdateState>((set, get) => ({
+export const useAppUpdate = create<AppUpdateState>()((set, get) => ({
   status: 'idle',
   progress: 0,
   dismissed: false,

@@ -61,7 +61,7 @@ export type CollabState = {
 
 const docsActive = () => useDocsStore.getState().activeId;
 
-export const useCollabStore = create<CollabState>((set, get) => {
+export const useCollabStore = create<CollabState>()((set, get) => {
   // ---- reconciliation: registry <-> open channels + virtual tabs ------------
   const reconcile = () => {
     if (!mgr) return;

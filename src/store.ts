@@ -77,7 +77,7 @@ export type FlowState = {
   reset: () => void;
 };
 
-export const useFlowStore = create<FlowState>((set, get) => ({
+export const useFlowStore = create<FlowState>()((set, get) => ({
   nodes: [],
   edges: [],
   diagramName: 'Sans titre',
