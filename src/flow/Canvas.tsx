@@ -372,12 +372,25 @@ export function Canvas() {
       if (!me || isGroupNode(me)) return;
 
       const r = rectOf(live);
-      const abs = { x: r.x, y: r.y };
+      // Absolute drop position from the FINAL dragged position + the parent chain.
+      // `live.positionAbsolute` can lag ~1 frame after a drag, which made a
+      // re-dragged child wrongly read as "outside" its group and teleport on detach.
+      const abs = { x: dragged.position.x, y: dragged.position.y };
+      const seenP = new Set<string>();
+      let pid = me.parentId;
+      while (pid && !seenP.has(pid)) {
+        seenP.add(pid);
+        const p = rf.getNode(pid);
+        if (!p) break;
+        abs.x += p.position.x;
+        abs.y += p.position.y;
+        pid = p.parentId;
+      }
       // The block belongs to whichever group its CENTRE sits in — so dragging the
       // block's centre past a group's edge moves it out (or into another group),
       // no clicks needed (#4).
-      const cx = r.x + r.w / 2;
-      const cy = r.y + r.h / 2;
+      const cx = abs.x + r.w / 2;
+      const cy = abs.y + r.h / 2;
       let targetGroup: Node | undefined;
       for (const n of rf.getNodes()) {
         if (n.type !== 'group' || n.id === me.id) continue;
