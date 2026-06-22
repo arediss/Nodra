@@ -82,7 +82,7 @@ fn router(rooms: Rooms) -> Router {
         // installed natively on this machine. Registered BEFORE the static
         // fallback; neither path clashes with /sync.
         .route("/api/plugins", get(plugins_list_handler))
-        .route("/api/plugins/:id/*rel", get(plugin_asset_handler))
+        .route("/api/plugins/{id}/{*rel}", get(plugin_asset_handler))
         .fallback(static_handler)
         .with_state(rooms)
 }
@@ -100,8 +100,8 @@ async fn plugins_list_handler() -> impl IntoResponse {
     }
 }
 
-/// GET /api/plugins/:id/*rel -> serve `<app-data>/plugins/:id/<rel>`. Path-traversal
-/// safe: `:id` is validated and the canonicalized target is asserted to stay inside
+/// GET /api/plugins/{id}/{*rel} -> serve `<app-data>/plugins/{id}/<rel>`. Path-traversal
+/// safe: `{id}` is validated and the canonicalized target is asserted to stay inside
 /// the plugin dir (same guards as the Tauri read commands, shared impl).
 async fn plugin_asset_handler(Path((id, rel)): Path<(String, String)>) -> impl IntoResponse {
     let base = match plugins::plugins_dir_base() {

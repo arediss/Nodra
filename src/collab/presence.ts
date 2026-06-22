@@ -78,7 +78,7 @@ type PresenceState = {
   clear: () => void;
 };
 
-export const usePresenceStore = create<PresenceState>((set, get) => ({
+export const usePresenceStore = create<PresenceState>()((set, get) => ({
   peers: {},
   selfName: localPeer.name,
   setSelfName: (selfName) => set({ selfName }),

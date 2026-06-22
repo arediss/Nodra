@@ -22,14 +22,14 @@ serde_json = "1"
 # Web ("-serve") mode + live-share server: embed the built frontend (rust-embed)
 # and serve it together with a WebSocket relay over HTTP (axum/tokio).
 rust-embed = "8"
-axum = { version = "0.7", features = ["ws"] }
+axum = { version = "0.8", features = ["ws"] }
 tokio = { version = "1", features = ["rt-multi-thread", "net", "sync", "macros", "time"] }
 futures-util = "0.3"
 local-ip-address = "0.6"
 # Plugin install (download + verify + unzip) from the registry (Brick #2).
 reqwest = { version = "0.12", default-features = false, features = ["rustls-tls"] }
-sha2 = "0.10"
-zip = { version = "2", default-features = false, features = ["deflate"] }
+sha2 = "0.11"
+zip = { version = "4", default-features = false, features = ["deflate"] }
 # Resolve the OS app-data dir WITHOUT a Tauri AppHandle (the `-serve` web mode has
 # none) so HTTP plugin routes hit the same `<data dir>/<bundle id>/plugins` that
 # Tauri's own `app_data_dir()` (also `dirs::data_dir()/<id>`) returns.

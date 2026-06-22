@@ -88,7 +88,7 @@ export type DocsState = {
   restoreSnapshot: (snapId: string) => void;
 };
 
-export const useDocsStore = create<DocsState>((set, get) => ({
+export const useDocsStore = create<DocsState>()((set, get) => ({
   docs: [],
   activeId: null,
   snapshots: [],

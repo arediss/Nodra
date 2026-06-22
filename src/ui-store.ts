@@ -157,7 +157,7 @@ export type UiState = {
   setGridStyle: (g: GridStyle) => void;
 };
 
-export const useUiStore = create<UiState>((set, get) => ({
+export const useUiStore = create<UiState>()((set, get) => ({
   tool: 'select',
   recents: loadRecents(),
   picker: null,

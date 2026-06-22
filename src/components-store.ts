@@ -126,7 +126,7 @@ export type ComponentsState = {
   updateAllInstances: () => void;
 };
 
-export const useComponentsStore = create<ComponentsState>((set, get) => ({
+export const useComponentsStore = create<ComponentsState>()((set, get) => ({
   defs: readDefs(),
 
   init: () => set({ defs: readDefs() }),
