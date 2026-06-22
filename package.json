@@ -18,6 +18,8 @@
     "@dagrejs/dagre": "^1.1.4",
     "@iconify/react": "^5.0.2",
     "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-updater": "^2.10.1",
     "@xyflow/react": "^12.3.6",
     "html-to-image": "^1.11.13",
     "i18next": "^26.3.1",

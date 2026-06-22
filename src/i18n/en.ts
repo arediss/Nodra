@@ -7,6 +7,14 @@ export const en: Dict = {
   "about.title": "About",
   "about.version": "version {version}",
 
+  // appupdate
+  "appupdate.available": "Update {version} available",
+  "appupdate.dismiss": "Dismiss",
+  "appupdate.downloading": "Downloading… {percent}%",
+  "appupdate.failed": "Update failed",
+  "appupdate.install": "Install and restart",
+  "appupdate.ready": "Update ready, restarting…",
+
   // banner
   "banner.dismiss": "Dismiss",
   "banner.install": "Install",

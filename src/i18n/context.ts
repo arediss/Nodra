@@ -11,6 +11,14 @@ export const context: Record<keyof Dict, string> = {
   "about.title": "About tab: card title",
   "about.version": "About tab: app version line",
 
+  // appupdate
+  "appupdate.available": "App-update banner: a newer app version is available ({version}).",
+  "appupdate.dismiss": "App-update banner: aria-label on the dismiss button.",
+  "appupdate.downloading": "App-update banner: download progress ({percent} = 0–100).",
+  "appupdate.failed": "App-update banner: shown when the update download/install failed.",
+  "appupdate.install": "App-update banner: button to download, install and restart. Keep short.",
+  "appupdate.ready": "App-update banner: update installed, the app is about to relaunch.",
+
   // banner
   "banner.dismiss": "Banners: aria-label on the close/dismiss button",
   "banner.install": "Missing-plugins banner: button to install a single missing plugin",

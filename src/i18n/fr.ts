@@ -12,6 +12,14 @@ export const fr = {
   "about.title": "À propos",
   "about.version": "version {version}",
 
+  // appupdate
+  "appupdate.available": "Mise à jour {version} disponible",
+  "appupdate.dismiss": "Ignorer",
+  "appupdate.downloading": "Téléchargement… {percent} %",
+  "appupdate.failed": "Échec de la mise à jour",
+  "appupdate.install": "Installer et redémarrer",
+  "appupdate.ready": "Mise à jour prête, redémarrage…",
+
   // banner
   "banner.dismiss": "Ignorer",
   "banner.install": "Installer",
