@@ -38,7 +38,7 @@
     "playwright": "^1.61.0",
     "svgo": "^3.3.2",
     "typescript": "^5.6.3",
-    "vite": "^6.0.3"
+    "vite": "^8.0.16"
   },
   "allowScripts": {
     "esbuild@0.25.12": true
