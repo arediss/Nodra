@@ -110,6 +110,12 @@ export const fr = {
   "history.saveVersion": "Enregistrer cette version",
   "history.title": "Historique",
 
+  // layers
+  "layers.count": "{count} nœud(s)",
+  "layers.empty": "Rien sur le canvas",
+  "layers.title": "Calques",
+  "layers.unnamed": "(sans nom)",
+
   // loader
   "loader.pluginLoaded": "{id} chargé",
   "loader.pluginReloaded": "{id} rechargé",
