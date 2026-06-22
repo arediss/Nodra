@@ -249,6 +249,7 @@ function PickerInner({ picker }: { picker: PickerAnchor }) {
       style={{ left: pos.left, top: pos.top }}
       role="dialog"
       aria-label={t('picker.title')}
+      tabIndex={-1}
       onKeyDown={onKeyDown}
     >
       <div className="npk-search">

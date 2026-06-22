@@ -183,6 +183,53 @@ export function Canvas() {
     e.dataTransfer.dropEffect = 'move';
   }, []);
 
+  // Absorb into a group every non-group, non-child node whose CENTRE sits inside
+  // it. Used both when a group is CREATED over existing nodes and when one is
+  // DRAGGED over them. Reparents (parentId + position relative to the group), so
+  // captured nodes then render ABOVE the group and stay clickable. Manual rect test
+  // (not getIntersectingNodes) so it also works before the group is measured.
+  const captureIntoGroup = useCallback(
+    (groupId: string) => {
+      const grp = rf.getNode(groupId);
+      if (!grp || grp.type !== 'group') return;
+      const rectOf = (n: Node) => {
+        const p =
+          (n as unknown as { positionAbsolute?: { x: number; y: number } }).positionAbsolute ??
+          n.position;
+        const w = (n.measured?.width ?? n.width ?? 0) as number;
+        const h = (n.measured?.height ?? n.height ?? 0) as number;
+        return { x: p.x, y: p.y, w, h };
+      };
+      const g = rectOf(grp);
+      if (g.w === 0 || g.h === 0) return;
+      const current = useFlowStore.getState().nodes;
+      const captured: string[] = [];
+      const next = current.map((n) => {
+        if (n.type === 'group' || n.id === grp.id || n.parentId === grp.id) return n;
+        const rn = rectOf(rf.getNode(n.id) ?? (n as Node));
+        const cx = rn.x + rn.w / 2;
+        const cy = rn.y + rn.h / 2;
+        if (cx >= g.x && cx <= g.x + g.w && cy >= g.y && cy <= g.y + g.h) {
+          captured.push(n.id);
+          return { ...n, parentId: grp.id, position: { x: rn.x - g.x, y: rn.y - g.y } } as AppNode;
+        }
+        return n;
+      });
+      if (captured.length) {
+        // ReactFlow requires a parent to appear BEFORE its children in the nodes
+        // array. The captured nodes were created before this group, so move them
+        // right after it — otherwise the parentId is silently ignored (the bug).
+        const cap = new Set(captured);
+        const ordered = next.filter((n) => !cap.has(n.id));
+        const gi = ordered.findIndex((n) => n.id === grp.id);
+        ordered.splice(gi + 1, 0, ...next.filter((n) => cap.has(n.id)));
+        setNodes(ordered);
+        requestAnimationFrame(() => captured.forEach((id) => updateNodeInternals(id)));
+      }
+    },
+    [rf, setNodes, updateNodeInternals],
+  );
+
   const onDrop = useCallback(
     (e: DragEvent) => {
       e.preventDefault();
@@ -248,9 +295,11 @@ export function Canvas() {
       const position = rf.screenToFlowPosition({ x: e.clientX, y: e.clientY });
       const id = insertTemplate(tool, position);
       if (id) selectNode(id);
+      // A group dropped over existing nodes absorbs them (next frame, once mounted).
+      if (id && tool === 'group') requestAnimationFrame(() => captureIntoGroup(id));
       setTool('select');
     },
-    [tool, rf, selectNode, setTool, editable],
+    [tool, rf, selectNode, setTool, editable, captureIntoGroup],
   );
 
   // Group drag bookkeeping: cache the contained children + last position so we
@@ -295,8 +344,22 @@ export function Canvas() {
 
   const onNodeDragStop = useCallback(
     (_: unknown, dragged: Node) => {
+      // Absolute rect of any node (positionAbsolute + measured size).
+      const rectOf = (n: Node) => {
+        const p =
+          (n as unknown as { positionAbsolute?: { x: number; y: number } }).positionAbsolute ??
+          n.position;
+        const w = (n.measured?.width ?? n.width ?? 0) as number;
+        const h = (n.measured?.height ?? n.height ?? 0) as number;
+        return { x: p.x, y: p.y, w, h };
+      };
+
+      // A GROUP was moved: absorb any non-group node it now covers (centre inside)
+      // that isn't already its child — set parentId + position relative to the group.
+      // Mirror of dropping a block INTO a group, for "drop a group OVER blocks".
       if (dragged.type === 'group') {
         groupDragRef.current = null; // waypoints already shifted live in onNodeDrag
+        captureIntoGroup(dragged.id);
         return;
       }
 
@@ -308,23 +371,26 @@ export function Canvas() {
       const me = current.find((n) => n.id === dragged.id);
       if (!me || isGroupNode(me)) return;
 
-      // Absolute rect of any node (positionAbsolute + measured size).
-      const rectOf = (n: Node) => {
-        const p =
-          (n as unknown as { positionAbsolute?: { x: number; y: number } }).positionAbsolute ??
-          n.position;
-        const w = (n.measured?.width ?? n.width ?? 0) as number;
-        const h = (n.measured?.height ?? n.height ?? 0) as number;
-        return { x: p.x, y: p.y, w, h };
-      };
-
       const r = rectOf(live);
-      const abs = { x: r.x, y: r.y };
+      // Absolute drop position from the FINAL dragged position + the parent chain.
+      // `live.positionAbsolute` can lag ~1 frame after a drag, which made a
+      // re-dragged child wrongly read as "outside" its group and teleport on detach.
+      const abs = { x: dragged.position.x, y: dragged.position.y };
+      const seenP = new Set<string>();
+      let pid = me.parentId;
+      while (pid && !seenP.has(pid)) {
+        seenP.add(pid);
+        const p = rf.getNode(pid);
+        if (!p) break;
+        abs.x += p.position.x;
+        abs.y += p.position.y;
+        pid = p.parentId;
+      }
       // The block belongs to whichever group its CENTRE sits in — so dragging the
       // block's centre past a group's edge moves it out (or into another group),
       // no clicks needed (#4).
-      const cx = r.x + r.w / 2;
-      const cy = r.y + r.h / 2;
+      const cx = abs.x + r.w / 2;
+      const cy = abs.y + r.h / 2;
       let targetGroup: Node | undefined;
       for (const n of rf.getNodes()) {
         if (n.type !== 'group' || n.id === me.id) continue;
@@ -367,7 +433,7 @@ export function Canvas() {
         requestAnimationFrame(() => updateNodeInternals(tid));
       }
     },
-    [rf, setNodes, updateNodeInternals],
+    [rf, setNodes, updateNodeInternals, captureIntoGroup],
   );
 
   return (

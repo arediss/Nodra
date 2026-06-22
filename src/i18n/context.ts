@@ -109,6 +109,12 @@ export const context: Record<keyof Dict, string> = {
   "history.saveVersion": "HistoryMenu: button to capture a snapshot of the current document",
   "history.title": "HistoryMenu: title/aria-label on the history dropdown button",
 
+  // layers
+  "layers.count": "Layers panel: node-count summary line.",
+  "layers.empty": "Layers panel: shown when the canvas has no nodes.",
+  "layers.title": "Layers panel: title + dock toggle label (Figma-style outline).",
+  "layers.unnamed": "Layers panel: fallback label for a node with no name.",
+
   // loader
   "loader.pluginLoaded": "Dev hot-reload: toast when a newly-appeared dev plugin is auto-loaded",
   "loader.pluginReloaded": "Dev hot-reload: toast when a dev plugin's built code changed and it was reloaded",

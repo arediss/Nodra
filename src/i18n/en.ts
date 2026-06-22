@@ -105,6 +105,12 @@ export const en: Dict = {
   "history.saveVersion": "Save this version",
   "history.title": "History",
 
+  // layers
+  "layers.count": "{count} node(s)",
+  "layers.empty": "Nothing on the canvas yet",
+  "layers.title": "Layers",
+  "layers.unnamed": "(unnamed)",
+
   // loader
   "loader.pluginLoaded": "{id} loaded",
   "loader.pluginReloaded": "{id} reloaded",

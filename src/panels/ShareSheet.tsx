@@ -100,10 +100,19 @@ export function ShareSheet() {
   const tunnelLink = info && tunnel.trim() ? `${normBase(tunnel)}/#room=${info.token}` : '';
 
   return (
-    <div className="sheet-overlay" onMouseDown={close}>
+    <div
+      className="sheet-overlay"
+      onMouseDown={close}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') close();
+      }}
+      role="button"
+      tabIndex={-1}
+    >
       <div
         className="sheet sheet-sm"
         onMouseDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-label={t('share.title')}
       >

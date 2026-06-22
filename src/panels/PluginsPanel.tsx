@@ -131,7 +131,7 @@ export function PluginsPanel() {
 
       <section className="set-card">
         <div className="set-card-title">
-          <span>{t('pluginspanel.catalogTitle')}</span>
+          <span>{t('pluginspanel.catalogTitle')}</span>{' '}
           <button
             type="button"
             className="btn-icon plug-refresh"

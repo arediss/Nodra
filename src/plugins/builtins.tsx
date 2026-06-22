@@ -8,16 +8,19 @@ import { NoteNode } from '../flow/nodes/NoteNode';
 import { CommentNode } from '../flow/nodes/CommentNode';
 import { TextNode } from '../flow/nodes/TextNode';
 import { UnknownNode } from '../flow/nodes/UnknownNode';
+import { CORE_BLOCKS } from '../icons/coreBlocks';
+import { LayersPanel } from '../panels/LayersPanel';
+import { i18n } from '../i18n';
 
 let done = false;
 
 /**
- * Register the core's own node types through the host SDK (no special core path —
- * rule #4). Synchronous: must run before the first render so the canvas has its
- * node types. The core ships EMPTY of pluggable things: icon packs, importers,
- * exporters and panels come only from installed plugins (loaded from disk by
- * loadDiskPlugins). Only the generic node types + the native JSON exporter are
- * core builtins.
+ * Register the core's own contributions through the host SDK (no special core path
+ * — rule #4). Synchronous: must run before the first render so the canvas has its
+ * node types. The core stays minimal — provider-specific icon packs and importers
+ * come from installed plugins — but ships the generic node types, the native JSON
+ * exporter, a small generic block set (CORE_BLOCKS) so the app is usable with no
+ * plugin installed, and the built-in Layers outline panel.
  */
 export function registerBuiltins(): void {
   if (done) return;
@@ -41,6 +44,19 @@ export function registerBuiltins(): void {
   // 'default' is ReactFlow's fallback key: any unknown/plugin type a peer or a
   // removed plugin leaves behind renders as UnknownNode — data is never altered.
   host.nodeTypes.register('default', UnknownNode);
+
+  // A generic starter block set so the palette isn't empty without plugins.
+  host.blocks.register(CORE_BLOCKS);
+
+  // Core "Layers" outline panel (Figma-style node tree). Title captured at init;
+  // the panel's own header re-translates via useTranslation.
+  host.panels.register({
+    id: 'layers',
+    side: 'right',
+    component: LayersPanel,
+    title: i18n.t('layers.title'),
+    icon: 'mdi:layers-outline',
+  });
 
   registerBuiltinExporters(host);
 }
