@@ -6,6 +6,7 @@ import {
   BackgroundVariant,
   MiniMap,
   ConnectionMode,
+  PanOnScrollMode,
   MarkerType,
   useReactFlow,
   useUpdateNodeInternals,
@@ -119,6 +120,7 @@ export function Canvas() {
           position: { x: pAbs.x + n.position.x, y: pAbs.y + n.position.y },
         } as AppNode;
       });
+      useFlowStore.getState().commit(); // undoable: standalone reparent (no drag)
       setNodes(next);
     },
     [rf, setNodes],
@@ -182,6 +184,19 @@ export function Canvas() {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   }, []);
+
+  // Commit ONE history entry before a key/programmatic delete, so the node and
+  // its connected edges revert together on undo, then let the delete proceed.
+  // ReactFlow calls this even on an empty Backspace (nothing selected) — only
+  // commit when something is actually being deleted, else a stray keypress would
+  // record a no-op step and wipe the redo stack.
+  const onBeforeDelete = useCallback(
+    async ({ nodes, edges }: { nodes: Node[]; edges: Edge[] }) => {
+      if (nodes.length || edges.length) useFlowStore.getState().commit();
+      return true;
+    },
+    [],
+  );
 
   // Absorb into a group every non-group, non-child node whose CENTRE sits inside
   // it. Used both when a group is CREATED over existing nodes and when one is
@@ -461,7 +476,12 @@ export function Canvas() {
         nodesConnectable={editable && !canvasLocked}
         elementsSelectable={editable}
         deleteKeyCode={editable && !canvasLocked ? ['Backspace', 'Delete'] : []}
+        onBeforeDelete={onBeforeDelete}
         proOptions={{ hideAttribution: false }}
+        zoomOnScroll={false}
+        zoomOnPinch
+        panOnScroll
+        panOnScrollMode={PanOnScrollMode.Free}
         panOnDrag
         selectionKeyCode="Shift"
         multiSelectionKeyCode={['Meta', 'Shift']}

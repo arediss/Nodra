@@ -123,6 +123,7 @@ export function LayersPanel() {
     } else {
       rest.push(...subtree);
     }
+    useFlowStore.getState().commit(); // undoable: layers-panel reparent
     setNodes(rest);
     selectNode(nodeId);
     requestAnimationFrame(() => sub.forEach((id) => updateNodeInternals(id)));

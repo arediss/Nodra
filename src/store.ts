@@ -13,6 +13,15 @@ import { derivePlugins } from './plugins/derivePlugins';
 
 export const newId = () => nanoid(8);
 
+type HistorySnapshot = { nodes: AppNode[]; edges: AppEdge[] };
+const HISTORY_CAP = 100;
+/** True while undo/redo (or a remote apply wrapped in withoutHistory) is mutating
+ *  the store — commit() becomes a no-op so those writes never record their own
+ *  history entry. Module-level: there is exactly one store instance app-wide. */
+let applyingHistory = false;
+/** Tracks an in-progress drag/resize so we commit exactly ONE entry at its start. */
+let wasDragging = false;
+
 /**
  * Legacy docs stored node size in `style.width/height`, which overrides the
  * `node.width/height` that NodeResizer writes — so resizing silently snapped
@@ -52,6 +61,20 @@ export type FlowState = {
    */
   readOnly: boolean;
 
+  // --- undo/redo history (structural changes only) ---
+  /** Snapshots of {nodes,edges} captured BEFORE each committed structural change. */
+  past: HistorySnapshot[];
+  /** Snapshots to redo into (cleared on any fresh commit). */
+  future: HistorySnapshot[];
+  /** Capture the CURRENT {nodes,edges} as a restore point. Call BEFORE mutating,
+   *  on every structural change you want undoable. No-op while read-only or while
+   *  an undo/redo/remote apply is in flight. */
+  commit: () => void;
+  undo: () => void;
+  redo: () => void;
+  canUndo: () => boolean;
+  canRedo: () => boolean;
+
   // ReactFlow controlled handlers
   onNodesChange: (changes: NodeChange<AppNode>[]) => void;
   onEdgesChange: (changes: EdgeChange<AppEdge>[]) => void;
@@ -85,6 +108,8 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
   selectedEdgeId: null,
   filePlugins: [],
   readOnly: false,
+  past: [],
+  future: [],
 
   onNodesChange: (changes) => {
     if (get().readOnly) {
@@ -96,6 +121,25 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
       set({ nodes: applyNodeChanges(safe, get().nodes) as AppNode[] });
       return;
     }
+    // Commit ONE history entry per drag/resize gesture: snapshot the state that
+    // existed just before the gesture, on the first moving frame. Subsequent
+    // frames + the final settle then mutate freely.
+    const moving = changes.some(
+      (c) =>
+        (c.type === 'position' && c.dragging === true) ||
+        (c.type === 'dimensions' && (c as { resizing?: boolean }).resizing === true),
+    );
+    if (moving && !wasDragging) {
+      wasDragging = true;
+      get().commit();
+    } else if (
+      !moving &&
+      changes.some((c) => c.type === 'position' || c.type === 'dimensions')
+    ) {
+      wasDragging = false;
+    }
+    // Key-deletes are committed once in Canvas's onBeforeDelete (covers the
+    // node + its edges in a single history entry), so no commit here.
     set({ nodes: applyNodeChanges(changes, get().nodes) as AppNode[] });
   },
 
@@ -111,21 +155,80 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
 
   onConnect: (connection) => {
     if (get().readOnly) return;
-    set({
-      edges: addEdge(
-        { ...connection, type: 'labeled', data: { label: '' } },
-        get().edges,
-      ) as AppEdge[],
-    });
+    const next = addEdge(
+      { ...connection, type: 'labeled', data: { label: '' } },
+      get().edges,
+    ) as AppEdge[];
+    // addEdge returns the SAME array on a duplicate connection — don't record a
+    // no-op history entry (it would also wipe the redo stack).
+    if (next === get().edges) return;
+    get().commit();
+    set({ edges: next });
   },
 
   addNode: (node) => {
     if (get().readOnly) return;
+    get().commit();
     set({ nodes: [...get().nodes, node] });
   },
 
   setNodes: (nodes) => set({ nodes }),
   setEdges: (edges) => set({ edges }),
+
+  // --- undo/redo engine ---
+  commit: () => {
+    if (applyingHistory || get().readOnly) return;
+    const { nodes, edges, past } = get();
+    set({
+      past: [...past, { nodes, edges }].slice(-HISTORY_CAP),
+      future: [], // a fresh edit invalidates the redo stack
+    });
+  },
+
+  undo: () => {
+    if (get().readOnly) return;
+    const { past, future, nodes, edges } = get();
+    const prev = past[past.length - 1];
+    if (!prev) return;
+    applyingHistory = true;
+    try {
+      set({
+        past: past.slice(0, -1),
+        future: [...future, { nodes, edges }].slice(-HISTORY_CAP),
+        nodes: prev.nodes,
+        edges: prev.edges,
+        // Clear selection so the SelectionBar/Balloon don't point at a block the
+        // undo may have removed (stale ids are otherwise harmless).
+        selectedNodeId: null,
+        selectedEdgeId: null,
+      });
+    } finally {
+      applyingHistory = false;
+    }
+  },
+
+  redo: () => {
+    if (get().readOnly) return;
+    const { past, future, nodes, edges } = get();
+    const next = future[future.length - 1];
+    if (!next) return;
+    applyingHistory = true;
+    try {
+      set({
+        past: [...past, { nodes, edges }].slice(-HISTORY_CAP),
+        future: future.slice(0, -1),
+        nodes: next.nodes,
+        edges: next.edges,
+        selectedNodeId: null,
+        selectedEdgeId: null,
+      });
+    } finally {
+      applyingHistory = false;
+    }
+  },
+
+  canUndo: () => get().past.length > 0,
+  canRedo: () => get().future.length > 0,
 
   updateNodeData: (id, patch) => {
     if (get().readOnly) return;
@@ -154,6 +257,8 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
   deleteSelection: () => {
     if (get().readOnly) return;
     const { selectedNodeId, selectedEdgeId, nodes, edges } = get();
+    if (!selectedNodeId && !selectedEdgeId) return; // nothing to delete
+    get().commit();
     // Removing a group also removes its children — collect every removed id
     // first so we can prune any edge that touches them (no dangling edges).
     const removed = new Set(
@@ -187,6 +292,9 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
       filePlugins: file.plugins ?? [],
       selectedNodeId: null,
       selectedEdgeId: null,
+      // A document switch / new file is not a single undoable edit.
+      past: [],
+      future: [],
     }),
 
   toDiagram: () => {
@@ -208,5 +316,7 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
       filePlugins: [],
       selectedNodeId: null,
       selectedEdgeId: null,
+      past: [],
+      future: [],
     }),
 }));
