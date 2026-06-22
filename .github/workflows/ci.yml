@@ -35,4 +35,10 @@ jobs:
         run: npm run build
 
       - name: Build a plugin (guards the plugin pipeline)
-        run: node scripts/build-plugin.mjs plugins/hello --no-zip
+        run: |
+          # The core ships no committed plugins (plugins/ is gitignored), so exercise
+          # scripts/build-plugin.mjs + the esbuild pipeline against a tiny fixture.
+          mkdir -p /tmp/ci-plugin
+          printf '%s' '{"id":"com.nodra.ci","name":"CI","version":"1.0.0","api_version":"1.0.0","permissions":[],"main":"index.js"}' > /tmp/ci-plugin/manifest.json
+          printf 'export function register() {}\n' > /tmp/ci-plugin/index.ts
+          node scripts/build-plugin.mjs /tmp/ci-plugin --no-zip
