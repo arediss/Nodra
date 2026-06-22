@@ -66,8 +66,17 @@ const SHARED = {
   'react/jsx-dev-runtime': 'jsxRuntime',
   '@xyflow/react': 'xyflow',
   '@iconify/react': 'iconify',
+  i18next: 'i18next',
+  'react-i18next': 'react-i18next',
 };
-const SHARED_ROOTS = ['react', 'react-dom', '@xyflow/react', '@iconify/react'];
+const SHARED_ROOTS = [
+  'react',
+  'react-dom',
+  '@xyflow/react',
+  '@iconify/react',
+  'i18next',
+  'react-i18next',
+];
 
 /** Resolve shared specifiers to a fail-fast CJS shim; forbid core + subpath imports. */
 const hostSharedShim = {

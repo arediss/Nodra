@@ -6,10 +6,13 @@ import * as JsxRuntime from 'react/jsx-runtime';
 import * as XYFlow from '@xyflow/react';
 import { ReactFlowProvider } from '@xyflow/react';
 import * as Iconify from '@iconify/react';
+import * as I18next from 'i18next';
+import * as ReactI18next from 'react-i18next';
 import App from './App';
 import { registerBuiltins } from './plugins/builtins';
 import { loadDiskPlugins, loadDevPlugins, startDevWatch } from './plugins/loader';
 import { useUiStore } from './ui-store';
+import './i18n';
 import './styles/tokens.css';
 import './styles/app.css';
 import '@xyflow/react/dist/style.css';
@@ -24,6 +27,8 @@ import '@xyflow/react/dist/style.css';
   jsxRuntime: JsxRuntime,
   xyflow: XYFlow,
   iconify: Iconify,
+  i18next: I18next,
+  'react-i18next': ReactI18next,
 };
 
 // Register the core's node types + bundled icon packs into the registries,

@@ -119,6 +119,20 @@ export type HostUtils = {
   newId(): string;
 };
 
+/**
+ * Localization over the host's shared i18next instance. Not gated. A plugin
+ * registers its own namespace (e.g. its id) then renders with
+ * `useTranslation('<ns>')` imported from 'react-i18next' (the host singleton).
+ */
+export type HostI18n = {
+  /** Register a translation bundle for a language + namespace (deep-merges, overwrites). */
+  addBundle(lng: string, ns: string, resources: Record<string, string>): void;
+  /** Current UI language code ('fr' | 'en' | …). */
+  language(): string;
+  /** Translate a key directly — for non-React contexts. */
+  t(key: string, vars?: Record<string, unknown>): string;
+};
+
 /** What a plugin receives in `register(host)`. Each method is capability-gated. */
 export type Host = {
   api_version: string;
@@ -137,6 +151,7 @@ export type Host = {
   flow: HostFlow;
   ui: HostUi;
   utils: HostUtils;
+  i18n: HostI18n;
   /**
    * Resolve a plugin-relative asset path to a fetchable URL.
    *

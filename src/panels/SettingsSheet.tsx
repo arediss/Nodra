@@ -7,6 +7,9 @@ import { DevPanel } from './DevPanel';
 import { isDesktop } from '../plugins/manage';
 import type { DiagramFile } from '../types';
 import sampleDiagram from '../data/sample-diagram.json';
+import { useTranslation } from 'react-i18next';
+import { setLang } from '../i18n';
+import type { Lang } from '../lib/lang';
 import './SettingsSheet.css';
 
 const MCP_CMD = 'claude mcp add nodra --transport http http://localhost:8080/mcp';
@@ -55,22 +58,23 @@ function ToggleRow({ prefKey, label, sub }: { prefKey: keyof Prefs; label: strin
   );
 }
 
-const THEME_OPTS: { id: 'light' | 'dark' | 'system'; label: string; icon: string }[] = [
-  { id: 'light', label: 'Clair', icon: 'mdi:white-balance-sunny' },
-  { id: 'dark', label: 'Sombre', icon: 'mdi:weather-night' },
-  { id: 'system', label: 'Auto', icon: 'mdi:laptop' },
+const THEME_OPTS: { id: 'light' | 'dark' | 'system'; icon: string }[] = [
+  { id: 'light', icon: 'mdi:white-balance-sunny' },
+  { id: 'dark', icon: 'mdi:weather-night' },
+  { id: 'system', icon: 'mdi:laptop' },
 ];
 
 function ThemeRow() {
+  const { t } = useTranslation();
   const theme = useUiStore((s) => s.theme);
   const setTheme = useUiStore((s) => s.setTheme);
   return (
     <div className="switch-row">
       <span className="switch-label">
-        Thème
-        <span className="switch-sub">Clair, sombre, ou suivre le système</span>
+        {t('settings.theme')}
+        <span className="switch-sub">{t('settings.themeSub')}</span>
       </span>
-      <div className="seg" role="group" aria-label="Thème">
+      <div className="seg" role="group" aria-label={t('settings.theme')}>
         {THEME_OPTS.map((o) => (
           <button
             key={o.id}
@@ -80,6 +84,38 @@ function ThemeRow() {
             onClick={() => setTheme(o.id)}
           >
             <Icon icon={o.icon} width={15} height={15} />
+            {t(`theme.${o.id}`)}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+// Language names are shown in their own language (not translated).
+const LANG_OPTS: { id: Lang; label: string }[] = [
+  { id: 'fr', label: 'Français' },
+  { id: 'en', label: 'English' },
+];
+
+function LangRow() {
+  const { t, i18n } = useTranslation();
+  const cur: Lang = i18n.language?.startsWith('en') ? 'en' : 'fr';
+  return (
+    <div className="switch-row">
+      <span className="switch-label">
+        {t('settings.language')}
+        <span className="switch-sub">{t('settings.languageSub')}</span>
+      </span>
+      <div className="seg" role="group" aria-label={t('settings.language')}>
+        {LANG_OPTS.map((o) => (
+          <button
+            key={o.id}
+            type="button"
+            className="seg-btn"
+            data-on={cur === o.id ? 'true' : undefined}
+            onClick={() => setLang(o.id)}
+          >
             {o.label}
           </button>
         ))}
@@ -103,6 +139,8 @@ export function SettingsSheet() {
   const close = useUiStore((s) => s.closeSettings);
   const setSettingsTab = useUiStore((s) => s.setSettingsTab);
   const loadDiagram = useFlowStore((s) => s.loadDiagram);
+  // `tr` aliased so it doesn't shadow the `t` (tab) param in the TABS maps below.
+  const { t: tr } = useTranslation();
   // The store is the single source of truth for the active tab (set by
   // openSettings(tab) and the nav below), so external routing never races.
   const tab: TabId = TABS.some((t) => t.id === requestedTab)
@@ -155,8 +193,9 @@ export function SettingsSheet() {
           <div className="set-main-body">
             {tab === 'general' && (
               <>
-                <Card title="Apparence">
+                <Card title={tr('settings.appearance')}>
                   <ThemeRow />
+                  <LangRow />
                 </Card>
                 <Card title="Édition">
                   <ToggleRow
