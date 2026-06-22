@@ -45,6 +45,10 @@ export default function App() {
       } else if (k === 'o') {
         e.preventDefault();
         openFromFile();
+      } else if (k === 'r' && import.meta.env.DEV) {
+        // Dev convenience: ⌘R reloads the webview (Tauri doesn't wire it natively).
+        e.preventDefault();
+        window.location.reload();
       }
     };
     window.addEventListener('keydown', onKey);

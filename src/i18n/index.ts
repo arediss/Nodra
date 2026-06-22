@@ -24,7 +24,9 @@ void i18n.use(initReactI18next).init({
   fallbackNS: 'core',
   keySeparator: false,
   nsSeparator: false,
-  interpolation: { escapeValue: false }, // React already escapes; values are trusted UI text
+  // Single-brace {name} placeholders to match our dictionaries (i18next defaults
+  // to {{name}}). escapeValue off: React already escapes, values are trusted UI text.
+  interpolation: { escapeValue: false, prefix: '{', suffix: '}' },
   returnNull: false,
 });
 
