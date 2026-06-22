@@ -9,7 +9,6 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --port 5173 --strictPort",
     "typecheck": "tsc --noEmit",
-    "build:icons": "node scripts/build-icons.mjs",
     "build:plugin": "node scripts/build-plugin.mjs",
     "plugins:install": "node scripts/dev-install.mjs",
     "tauri": "tauri"
