@@ -107,19 +107,18 @@ function LangRow() {
         {t('settings.language')}
         <span className="switch-sub">{t('settings.languageSub')}</span>
       </span>
-      <div className="seg" role="group" aria-label={t('settings.language')}>
+      <select
+        className="set-select"
+        value={cur}
+        onChange={(e) => setLang(e.target.value as Lang)}
+        aria-label={t('settings.language')}
+      >
         {LANG_OPTS.map((o) => (
-          <button
-            key={o.id}
-            type="button"
-            className="seg-btn"
-            data-on={cur === o.id ? 'true' : undefined}
-            onClick={() => setLang(o.id)}
-          >
+          <option key={o.id} value={o.id}>
             {o.label}
-          </button>
+          </option>
         ))}
-      </div>
+      </select>
     </div>
   );
 }
