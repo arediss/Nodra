@@ -8,6 +8,8 @@ import { NoteNode } from '../flow/nodes/NoteNode';
 import { CommentNode } from '../flow/nodes/CommentNode';
 import { TextNode } from '../flow/nodes/TextNode';
 import { UnknownNode } from '../flow/nodes/UnknownNode';
+import { LayersPanel } from '../panels/LayersPanel';
+import { i18n } from '../i18n';
 
 let done = false;
 
@@ -41,6 +43,16 @@ export function registerBuiltins(): void {
   // 'default' is ReactFlow's fallback key: any unknown/plugin type a peer or a
   // removed plugin leaves behind renders as UnknownNode — data is never altered.
   host.nodeTypes.register('default', UnknownNode);
+
+  // Core "Layers" outline panel (Figma-style node tree). Title captured at init;
+  // the panel's own header re-translates via useTranslation.
+  host.panels.register({
+    id: 'layers',
+    side: 'right',
+    component: LayersPanel,
+    title: i18n.t('layers.title'),
+    icon: 'mdi:layers-outline',
+  });
 
   registerBuiltinExporters(host);
 }
