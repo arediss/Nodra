@@ -1,0 +1,34 @@
+.pfd-text-node {
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  padding: 4px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+}
+
+.pfd-text-node.is-selected {
+  border: 1px dashed var(--accent);
+}
+
+.pfd-text-node__input {
+  display: block;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  overflow: hidden;
+  font-family: inherit;
+  font-weight: 500;
+  line-height: 1.35;
+  color: var(--text);
+}
+
+.pfd-text-node__input::placeholder {
+  color: var(--text-tertiary);
+}

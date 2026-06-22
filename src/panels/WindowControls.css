@@ -1,0 +1,62 @@
+.win-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.win-dot {
+  position: relative;
+  width: 12px;
+  height: 12px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.12);
+  cursor: pointer;
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  transition: filter var(--ease, 0.15s ease);
+}
+
+.win-close {
+  background: #ff5f57;
+}
+
+.win-min {
+  background: #febc2e;
+}
+
+.win-max {
+  background: #28c840;
+}
+
+.win-dot::after {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--mono, monospace);
+  font-size: 9px;
+  font-weight: 600;
+  line-height: 1;
+  color: rgba(0, 0, 0, 0.55);
+  opacity: 0;
+  transition: opacity var(--ease, 0.15s ease);
+}
+
+.win-close::after {
+  content: '\00D7';
+}
+
+.win-min::after {
+  content: '\2013';
+}
+
+.win-max::after {
+  content: '+';
+}
+
+.win-controls:hover .win-dot::after {
+  opacity: 1;
+}

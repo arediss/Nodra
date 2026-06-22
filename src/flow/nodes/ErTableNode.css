@@ -1,0 +1,179 @@
+.er-card {
+  --er-accent: var(--accent);
+  min-width: 170px;
+  width: 100%;
+  height: 100%;
+  background: var(--surface);
+  color: var(--text);
+  border: 0.5px solid var(--hairline);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-card);
+  overflow: hidden;
+  font-family: var(--font);
+  display: flex;
+  flex-direction: column;
+}
+
+.er-selected {
+  box-shadow: 0 0 0 2px var(--accent), var(--shadow-pop);
+}
+
+.er-header {
+  background: var(--er-accent, var(--accent));
+  color: #ffffff;
+  font-weight: 600;
+  font-size: 12.5px;
+  padding: 7px 11px;
+}
+
+.er-header-label {
+  display: block;
+}
+
+.er-header-input {
+  width: 100%;
+  height: 24px;
+  padding: 2px 6px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--text);
+}
+
+.er-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.er-row {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 11px;
+  font-size: 12px;
+  border-top: 0.5px solid var(--hairline);
+}
+
+.er-row-alt {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.er-col-name {
+  flex: 1;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.er-col-type {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-tertiary);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.er-badge {
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  padding: 2px 5px;
+  border-radius: var(--radius-sm);
+  letter-spacing: 0.02em;
+}
+
+.er-badge-pk {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.er-badge-fk {
+  background: rgba(255, 159, 10, 0.16);
+  color: var(--orange);
+}
+
+.er-handle {
+  width: 8px;
+  height: 8px;
+  background: var(--surface);
+  border: 1.5px solid var(--er-accent, var(--accent));
+  border-radius: 50%;
+  opacity: 0.85;
+  transition: opacity 0.15s var(--ease);
+}
+
+.er-card:hover .er-handle {
+  opacity: 1;
+}
+
+.er-handle-left {
+  left: -4px;
+}
+
+.er-handle-right {
+  right: -4px;
+}
+
+/* ---- inline edit mode ---- */
+
+.er-input-name {
+  flex: 1;
+  min-width: 0;
+  height: 24px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.er-input-key {
+  width: 52px;
+  height: 24px;
+  padding: 2px 4px;
+  font-size: 11px;
+}
+
+.er-input-type {
+  width: 78px;
+  height: 24px;
+  padding: 2px 6px;
+  font-size: 11px;
+  font-family: var(--mono);
+}
+
+.er-remove {
+  width: 22px;
+  height: 22px;
+  flex: none;
+}
+
+.er-edit-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 7px 11px;
+  border-top: 0.5px solid var(--hairline);
+}
+
+.er-add {
+  font-size: 11.5px;
+  padding: 3px 8px;
+}
+
+.er-done {
+  font-size: 11.5px;
+  padding: 3px 10px;
+}
+
+.er-hint {
+  font-size: 10px;
+  text-align: center;
+  padding: 3px 11px;
+  border-top: 0.5px solid var(--hairline);
+  opacity: 0;
+  transition: opacity 0.15s var(--ease);
+}
+
+.er-card:hover .er-hint {
+  opacity: 1;
+}

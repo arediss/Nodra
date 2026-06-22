@@ -1,0 +1,609 @@
+* {
+  box-sizing: border-box;
+}
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+/* lock the page so the whole app can't scroll/bounce on trackpad gestures */
+body {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+}
+body {
+  font-family: var(--font);
+  background: var(--bg-window);
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.4;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  letter-spacing: -0.005em;
+}
+::selection {
+  background: var(--accent-soft);
+}
+
+/* ---------- app shell: full-bleed canvas with floating translucent panels ---------- */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--canvas-bg);
+}
+.app-body {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+}
+/* the flow fills everything; panels float over it */
+.canvas-wrap {
+  position: absolute;
+  inset: 0;
+  background: var(--canvas-bg);
+}
+.react-flow {
+  background: transparent;
+}
+
+/* ---------- tooltips (custom, macOS-ish) ---------- */
+[data-tip] {
+  position: relative;
+}
+[data-tip]::after {
+  content: attr(data-tip);
+  position: absolute;
+  top: calc(100% + 7px);
+  left: 50%;
+  transform: translateX(-50%) translateY(-3px);
+  background: rgba(38, 38, 40, 0.96);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease 0.45s, transform 0.12s ease 0.45s;
+  z-index: 70;
+}
+[data-tip]:hover::after {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* tooltip variant anchored to the RIGHT (vertical rail) */
+[data-tip-right] {
+  position: relative;
+}
+[data-tip-right]::after {
+  content: attr(data-tip-right);
+  position: absolute;
+  left: calc(100% + 9px);
+  top: 50%;
+  transform: translateY(-50%) translateX(-3px);
+  background: rgba(38, 38, 40, 0.96);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s ease 0.4s, transform 0.12s ease 0.4s;
+  z-index: 70;
+}
+[data-tip-right]:hover::after {
+  opacity: 1;
+  transform: translateY(-50%) translateX(0);
+}
+
+/* ---------- buttons (macOS push button) ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--hairline-strong);
+  background: var(--btn-bg);
+  box-shadow: var(--shadow-btn);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: filter 0.12s, background 0.12s, box-shadow 0.12s;
+}
+.btn:hover {
+  filter: brightness(0.975);
+}
+.btn:active {
+  background: var(--fill);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.08);
+}
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  box-shadow: none;
+}
+.btn-primary {
+  background: linear-gradient(180deg, var(--accent-hover), var(--accent));
+  border-color: transparent;
+  color: #fff;
+  box-shadow: 0 1px 2px rgba(0, 60, 160, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3);
+}
+.btn-primary:hover {
+  filter: brightness(1.04);
+}
+.btn-primary:active {
+  background: var(--accent-press);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
+}
+.btn-ghost {
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+  color: var(--text-secondary);
+}
+.btn-ghost:hover {
+  background: var(--fill);
+  filter: none;
+  color: var(--text);
+}
+.btn-ghost:active {
+  background: var(--fill-hover);
+}
+.btn-danger {
+  color: var(--red);
+  background: transparent;
+  border-color: transparent;
+  box-shadow: none;
+}
+.btn-danger:hover {
+  background: var(--danger-soft);
+  filter: none;
+}
+.btn-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.btn-icon:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+
+/* ---------- inputs ---------- */
+.input,
+.select {
+  width: 100%;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: var(--radius-sm);
+  border: 0.5px solid var(--hairline-strong);
+  background: var(--input-bg);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  outline: none;
+  box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.03);
+  transition: border-color 0.12s, box-shadow 0.12s;
+}
+.input:focus,
+.select:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3.5px var(--accent-ring);
+}
+.input::placeholder {
+  color: var(--text-quaternary);
+}
+textarea.input {
+  height: auto;
+  padding: 8px 9px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
+/* ---------- segmented control (macOS) ---------- */
+.seg {
+  display: inline-flex;
+  background: var(--fill);
+  border-radius: var(--radius-sm);
+  padding: 2px;
+  gap: 2px;
+  width: 100%;
+}
+.seg button {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s, box-shadow 0.14s;
+}
+.seg button:hover {
+  color: var(--text);
+}
+.seg button[data-active='true'] {
+  background: #fff;
+  color: var(--text);
+  box-shadow: var(--shadow-seg);
+}
+
+/* ---------- chips / pills ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: var(--fill);
+  border: none;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.14s, color 0.14s;
+}
+.chip:hover {
+  background: var(--fill-hover);
+  color: var(--text);
+}
+.chip[data-active='true'] {
+  background: var(--accent);
+  color: #fff;
+}
+
+/* ---------- panel structure ---------- */
+.panel-section {
+  padding: 16px 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.panel-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 0 0 12px;
+}
+.field {
+  margin-bottom: 11px;
+}
+.field:last-child {
+  margin-bottom: 0;
+}
+.field label {
+  display: block;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+.muted {
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+code {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  background: var(--fill);
+  padding: 1px 5px;
+  border-radius: 5px;
+}
+
+/* ---------- scrollbars (thin, Apple-like) ---------- */
+.scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(0, 0, 0, 0.22) transparent;
+}
+.scroll::-webkit-scrollbar {
+  width: 10px;
+}
+.scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 10px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+}
+.scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+  background-clip: padding-box;
+}
+
+/* keep ReactFlow attribution discreet */
+.react-flow__attribution {
+  background: transparent;
+  font-size: 9px;
+  opacity: 0.35;
+}
+
+/* ---------- sheets / modals (macOS) ---------- */
+.sheet-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  background: rgba(0, 0, 0, 0.22);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  animation: sheet-fade 0.18s var(--ease-out);
+}
+.sheet {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 720px;
+  max-height: 80vh;
+  background: var(--bg-window);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  overflow: hidden;
+  animation: sheet-pop 0.22s var(--ease-out);
+}
+.sheet-sm {
+  max-width: 460px;
+}
+.sheet-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--hairline);
+}
+.sheet-title {
+  font-size: 15px;
+  font-weight: 600;
+  flex: 1;
+  margin: 0;
+}
+.sheet-close {
+  width: 26px;
+  height: 26px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 50%;
+  background: var(--fill);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s;
+}
+.sheet-close:hover {
+  background: var(--fill-hover);
+  color: var(--text);
+}
+.sheet-body {
+  padding: 16px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.sheet-section-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-tertiary);
+  margin: 18px 0 8px;
+}
+.sheet-section-title:first-child {
+  margin-top: 0;
+}
+
+@keyframes sheet-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes sheet-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+}
+
+/* ---------- macOS toggle switch ---------- */
+.switch-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+}
+.switch-row + .switch-row {
+  border-top: 1px solid var(--hairline);
+}
+.switch-label {
+  font-size: 13px;
+  color: var(--text);
+}
+.switch-sub {
+  display: block;
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-top: 1px;
+}
+.switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 38px;
+  height: 23px;
+  border-radius: 999px;
+  background: rgba(120, 120, 128, 0.26);
+  cursor: pointer;
+  transition: background 0.2s var(--ease);
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  cursor: pointer;
+}
+.switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s var(--ease);
+}
+.switch[data-on='true'] {
+  background: var(--green);
+}
+.switch[data-on='true']::after {
+  transform: translateX(15px);
+}
+
+/* ---------- rounded frameless window (desktop / Tauri only) ---------- */
+html.is-tauri,
+html.is-tauri body,
+html.is-tauri #root {
+  background: transparent;
+}
+html.is-tauri .app {
+  border-radius: 11px;
+  box-shadow: inset 0 0 0 0.5px rgba(0, 0, 0, 0.16);
+}
+
+/* ---------- orchestrated load-in (a calm, staggered reveal) ---------- */
+@keyframes pfd-rise {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+}
+@keyframes pfd-fade {
+  from {
+    opacity: 0;
+  }
+}
+.tb-bar {
+  animation: pfd-rise 0.55s var(--ease-out) both;
+}
+.canvas-wrap {
+  animation: pfd-fade 0.7s var(--ease-out) 0.05s both;
+}
+
+/* Connection handles for note/comment/text/group blocks (shared). Hidden until
+   the node is hovered/selected, or the connect tool is active. */
+.pfd-handle.react-flow__handle {
+  width: 8px;
+  height: 8px;
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s var(--ease);
+}
+.react-flow__node:hover .pfd-handle.react-flow__handle,
+.react-flow__node.selected .pfd-handle.react-flow__handle {
+  opacity: 1;
+}
+.pfd-handle.react-flow__handle:hover {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+/* connect tool active OR a cable being dragged: reveal every block's handles
+   (accent + halo) so it's obvious where the link can land. */
+.cv-root[data-connecting='true'] .pfd-handle.react-flow__handle,
+.cv-root[data-connecting='true'] .ic-node-handle.react-flow__handle {
+  opacity: 1;
+  background: var(--accent);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+.cv-root[data-connecting='true'] .pfd-handle.react-flow__handle:hover,
+.cv-root[data-connecting='true'] .ic-node-handle.react-flow__handle:hover {
+  box-shadow: 0 0 0 6px var(--accent-ring);
+}
+
+/* ---------- right-docked floating side panels (Mermaid, Connexions) ---------- */
+.side-panel {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  bottom: 14px;
+  z-index: 40;
+  width: 360px;
+  max-width: calc(100vw - 28px);
+  display: flex;
+  flex-direction: column;
+  padding: 14px;
+  gap: 10px;
+  background: var(--bg-window);
+  border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-pop);
+  animation: side-slide 0.22s var(--ease-out) both;
+}
+@keyframes side-slide {
+  from { transform: translateX(calc(100% + 14px)); opacity: 0.4; }
+}
+.side-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.side-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+.side-close {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.side-close:hover { background: var(--fill); color: var(--text); }

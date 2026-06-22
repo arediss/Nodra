@@ -1,0 +1,43 @@
+{
+  "name": "nodra",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Self-hosted cloud-architecture & diagram editor (ReactFlow + Tauri). AWS/GCP/Azure icon packs, ER diagrams, containers, PNG/SVG export.",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 5173 --strictPort",
+    "typecheck": "tsc --noEmit",
+    "build:icons": "node scripts/build-icons.mjs",
+    "build:plugin": "node scripts/build-plugin.mjs",
+    "plugins:install": "node scripts/dev-install.mjs",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@dagrejs/dagre": "^1.1.4",
+    "@iconify/react": "^5.0.2",
+    "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@xyflow/react": "^12.3.6",
+    "html-to-image": "^1.11.13",
+    "nanoid": "^5.0.9",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "yjs": "^13.6.31",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@tauri-apps/api": "^2.1.1",
+    "@tauri-apps/cli": "^2.1.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "playwright": "^1.61.0",
+    "svgo": "^3.3.2",
+    "typescript": "^5.6.3",
+    "vite": "^6.0.3"
+  },
+  "allowScripts": {
+    "esbuild@0.25.12": true
+  }
+}

@@ -1,0 +1,86 @@
+.nds-field {
+  margin-bottom: 18px;
+}
+.nds-field:last-child {
+  margin-bottom: 0;
+}
+
+.nds-addr {
+  display: block;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-secondary);
+  background: var(--fill);
+  padding: 6px 9px;
+  border-radius: var(--radius-sm);
+  word-break: break-all;
+}
+
+.nds-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.nds-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 4px 0 9px;
+  border-radius: 999px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+}
+.nds-tag button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  border-radius: 50%;
+}
+.nds-tag button:hover {
+  background: rgba(0, 122, 255, 0.18);
+}
+
+.nds-meta-row,
+.nds-meta-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.nds-meta-key {
+  flex: 0 0 110px;
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nds-meta-add .input:first-child {
+  flex: 0 0 110px;
+}
+.nds-meta-add .btn {
+  flex: 0 0 auto;
+}
+
+.nds-readonly {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 7px 10px;
+  border-radius: var(--radius-sm);
+  background: var(--fill);
+  font-size: 12px;
+  color: var(--text-secondary);
+}

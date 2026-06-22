@@ -1,0 +1,128 @@
+:root {
+  /* ---- macOS light "materials" ---- */
+  --bg-window: #ffffff;
+  --bg-sidebar: #f4f4f6; /* NSVisualEffectView sidebar */
+  --bg-titlebar: #f6f6f8; /* solid toolbar */
+  --surface: #ffffff;
+  --surface-2: #f1f1f4;
+  --input-bg: #ffffff;
+  --btn-bg: linear-gradient(180deg, #fff, #fafafb);
+
+  /* translucent control fills (Apple secondary/tertiary system fills) */
+  --fill: rgba(118, 118, 128, 0.12);
+  --fill-hover: rgba(118, 118, 128, 0.2);
+  --fill-active: rgba(118, 118, 128, 0.28);
+
+  /* hairline separators */
+  --hairline: rgba(0, 0, 0, 0.09);
+  --hairline-strong: rgba(0, 0, 0, 0.14);
+
+  /* ---- text (Apple label hierarchy) ---- */
+  --text: #1d1d1f;
+  --text-secondary: #6e6e73;
+  --text-tertiary: #8e8e93;
+  --text-quaternary: #b0b0b5;
+
+  /* ---- canvas (Freeform-ish whiteboard) ---- */
+  --canvas-bg: #fbfbfd;
+  --canvas-dot: #d9d9e0;
+  --minimap-bg: rgba(255, 255, 255, 0.85);
+
+  /* ---- accents (macOS system colors) ---- */
+  --accent: #007aff;
+  --accent-hover: #1a86ff;
+  --accent-press: #0063d1;
+  --accent-soft: rgba(0, 122, 255, 0.12);
+  --accent-ring: rgba(0, 122, 255, 0.35);
+  --green: #34c759;
+  --orange: #ff9f0a;
+  --yellow: #ffcc00;
+  --red: #ff3b30;
+  --pink: #ff2d55;
+  --purple: #af52de;
+  --teal: #30b0c7;
+  --danger: #ff3b30;
+  --danger-soft: rgba(255, 59, 48, 0.12);
+
+  /* ---- shape ---- */
+  --radius-lg: 14px;
+  --radius: 10px;
+  --radius-sm: 7px;
+  --radius-xs: 5px;
+
+  /* ---- shadows (soft, layered) ---- */
+  --shadow-pop: 0 0 0 0.5px rgba(0, 0, 0, 0.04), 0 10px 28px rgba(0, 0, 0, 0.14),
+    0 2px 6px rgba(0, 0, 0, 0.08);
+  --shadow-card: 0 0 0 0.5px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.06),
+    0 4px 12px rgba(0, 0, 0, 0.05);
+  --shadow-btn: 0 1px 1.5px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.7);
+  --shadow-seg: 0 1px 2px rgba(0, 0, 0, 0.12), 0 0 0 0.5px rgba(0, 0, 0, 0.04);
+
+  /* ---- type: SF (authentic macOS — an intentional, native choice) ---- */
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display',
+    system-ui, 'Helvetica Neue', sans-serif;
+  --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+
+  /* ---- metrics / motion ---- */
+  --topbar-h: 52px;
+  --ease: cubic-bezier(0.32, 0.72, 0, 1); /* macOS-ish spring ease */
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ============================ Dark theme ============================ */
+/* Applied via <html data-theme="dark"> (see src/lib/theme.ts). Only the
+   surface/text/line colours flip; radii, type, motion stay shared. */
+:root[data-theme='dark'] {
+  --bg-window: #1c1c1e;
+  --bg-sidebar: #161618;
+  --bg-titlebar: #1c1c1e;
+  --surface: #2c2c2e;
+  --surface-2: #3a3a3c;
+  --input-bg: #1f1f22;
+  --btn-bg: linear-gradient(180deg, #3a3a3e, #333337);
+
+  --fill: rgba(255, 255, 255, 0.1);
+  --fill-hover: rgba(255, 255, 255, 0.16);
+  --fill-active: rgba(255, 255, 255, 0.24);
+
+  --hairline: rgba(255, 255, 255, 0.12);
+  --hairline-strong: rgba(255, 255, 255, 0.2);
+
+  --text: #f5f5f7;
+  --text-secondary: #aeaeb2;
+  --text-tertiary: #8e8e93;
+  --text-quaternary: #636366;
+
+  --canvas-bg: #141416;
+  --canvas-dot: #2e2e33;
+  --minimap-bg: rgba(40, 40, 44, 0.85);
+
+  --accent: #0a84ff;
+  --accent-hover: #409cff;
+  --accent-press: #0a84ff;
+  --accent-soft: rgba(10, 132, 255, 0.22);
+  --accent-ring: rgba(10, 132, 255, 0.45);
+  --danger-soft: rgba(255, 69, 58, 0.22);
+  --red: #ff453a;
+  --green: #30d158;
+  --orange: #ff9f0a;
+
+  --shadow-pop: 0 0 0 0.5px rgba(0, 0, 0, 0.5), 0 10px 28px rgba(0, 0, 0, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-card: 0 0 0 0.5px rgba(0, 0, 0, 0.4), 0 1px 2px rgba(0, 0, 0, 0.4),
+    0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-btn: 0 1px 1.5px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+  --shadow-seg: 0 1px 2px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(0, 0, 0, 0.3);
+}
+
+/* Let the OS/browser paint dark form controls, scrollbars, etc. */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+  }
+}

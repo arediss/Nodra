@@ -1,0 +1,19 @@
+.unknown-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  min-width: 110px;
+  border: 1px dashed var(--hairline-strong);
+  border-radius: var(--radius-sm);
+  background: var(--fill);
+  color: var(--text-tertiary);
+  font-size: 12px;
+  font-weight: 500;
+}
+.unknown-node-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 160px;
+}

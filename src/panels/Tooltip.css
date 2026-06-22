@@ -1,0 +1,36 @@
+.tt-anchor {
+  display: inline-flex;
+}
+
+.tt-pop {
+  position: fixed;
+  z-index: 1000;
+  background: rgba(38, 38, 40, 0.96);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
+  padding: 3px 8px;
+  border-radius: 6px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+  animation: tt-in 0.1s ease;
+}
+.tt-right {
+  transform: translateY(-50%);
+}
+.tt-left {
+  transform: translate(-100%, -50%);
+}
+.tt-bottom {
+  transform: translateX(-50%);
+}
+.tt-top {
+  transform: translate(-50%, -100%);
+}
+
+@keyframes tt-in {
+  from {
+    opacity: 0;
+  }
+}

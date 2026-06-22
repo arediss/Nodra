@@ -1,0 +1,34 @@
+node_modules
+dist
+dist-ssr
+*.local
+.DS_Store
+.vscode/*
+!.vscode/extensions.json
+
+# Tauri / Rust build output
+src-tauri/target
+
+# Plugin dev workspace — the core repo ships NO plugins; each plugin lives in its
+# own repo / a local dev folder (install from the registry or via Réglages →
+# Développeur). Build artifacts (dist/, plugin.zip) were covered above anyway.
+# Anchored to the repo root so it does NOT match src/plugins/ (the core plugin SDK).
+/plugins/
+
+# Generated icon assets — regenerate with `npm run build:icons`
+public/icons/*
+!public/icons/.gitkeep
+src/icons/generated/*
+!src/icons/generated/.gitkeep
+
+# --- Public repo scope: internal / tooling material stays LOCAL only ---
+# Local agent/session config (defensive — never commit it).
+.claude/
+# The plugin registry lives in its own repo (arediss/nodra-plugin-registry).
+/registry/
+# Icon-pack source + tooling (raw vendor packs are licensed; icons are plugins now).
+/icon-packs/
+# Only the user-facing guides ship; design/audit/roadmap/spec/process docs stay local.
+docs/*
+!docs/PLUGIN-AUTHORING.md
+!docs/PLUGINS-DEV.md

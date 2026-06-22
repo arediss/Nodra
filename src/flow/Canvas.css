@@ -1,0 +1,133 @@
+.cv-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  background: var(--canvas-bg);
+}
+
+/* placement mode (a creation tool is active) */
+.cv-root[data-placing='true'] .react-flow__pane {
+  cursor: crosshair;
+}
+
+.cv-root .react-flow {
+  background: var(--canvas-bg);
+}
+
+/* ---- Controls ---- */
+.cv-root .react-flow__controls {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 0.5px solid var(--hairline);
+  box-shadow: var(--shadow-card);
+  background: var(--surface);
+}
+
+.cv-root .react-flow__controls-button {
+  background: var(--surface);
+  border: none;
+  border-bottom: 0.5px solid var(--hairline);
+  color: var(--text-secondary);
+  fill: currentColor;
+  transition:
+    background 0.14s var(--ease),
+    color 0.14s var(--ease);
+}
+
+.cv-root .react-flow__controls-button:last-child {
+  border-bottom: none;
+}
+
+.cv-root .react-flow__controls-button svg {
+  fill: currentColor;
+}
+
+.cv-root .react-flow__controls-button:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+
+/* ---- MiniMap ---- */
+.cv-root .react-flow__minimap {
+  border-radius: var(--radius);
+  border: 0.5px solid var(--hairline);
+  box-shadow: var(--shadow-card);
+  background: var(--minimap-bg);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+
+.cv-root .react-flow__minimap-mask {
+  fill: rgba(0, 0, 0, 0.06);
+}
+
+.cv-root .react-flow__minimap-node {
+  fill: var(--text-quaternary);
+  stroke: none;
+}
+
+/* ---- Panel / attribution ---- */
+.cv-root .react-flow__panel {
+  margin: 12px;
+}
+
+.cv-root .react-flow__attribution {
+  background: transparent;
+  font-size: 10px;
+}
+
+.cv-root .react-flow__attribution a {
+  color: var(--text-quaternary);
+}
+
+/* ---- Selection ---- */
+.cv-root .react-flow__selection {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-xs);
+}
+
+.cv-root .react-flow__node.selected {
+  z-index: 10;
+}
+
+.cv-root .react-flow__edge.selected .react-flow__edge-path,
+.cv-root .react-flow__edge:focus .react-flow__edge-path {
+  stroke: var(--accent);
+}
+
+/* Edge labels live in this layer. ReactFlow elevates the <svg> of any edge that
+   touches a node inside a group (getElevatedEdgeZIndex), pushing the line above
+   this layer so labels disappear under it. Lift the whole label layer above all
+   edges (stays within the viewport's stacking context). */
+.cv-root .react-flow__edgelabel-renderer {
+  z-index: 1001;
+}
+
+/* Our node type is named `group`, which collides with ReactFlow's built-in
+   `group` node default chrome (black 1px border, white fill, padding, selected
+   box-shadow). GroupNode draws its own rounded frame, so strip the defaults to
+   avoid a doubled cadre. */
+.cv-root .react-flow__node-group {
+  padding: 0;
+  width: auto;
+  border: none;
+  border-radius: 0;
+  background-color: transparent;
+  box-shadow: none;
+}
+.cv-root .react-flow__node-group.selectable:hover,
+.cv-root .react-flow__node-group.selectable.selected {
+  box-shadow: none;
+}
+
+/* selected edge: flowing dash (used by the Connexions "go to link") — tied to
+   .selected so it stops the moment the edge is deselected. */
+.react-flow__edge.selected .react-flow__edge-path {
+  stroke-dasharray: 7 5 !important;
+  animation: cv-edge-flow 0.5s linear infinite;
+}
+@keyframes cv-edge-flow {
+  to { stroke-dashoffset: -24; }
+}

@@ -1,0 +1,71 @@
+{
+  "version": 1,
+  "name": "Exemple",
+  "nodes": [
+    {
+      "id": "g-sys",
+      "type": "group",
+      "position": { "x": 0, "y": 0 },
+      "width": 460,
+      "height": 320,
+      "data": { "label": "Système", "variant": "plain" }
+    },
+    {
+      "id": "n-note",
+      "type": "note",
+      "parentId": "g-sys",
+      "extent": "parent",
+      "position": { "x": 30, "y": 60 },
+      "width": 200,
+      "height": 130,
+      "data": { "text": "Bienvenue ! Glissez des blocs depuis le menu.", "color": "yellow" }
+    },
+    {
+      "id": "n-comment",
+      "type": "comment",
+      "parentId": "g-sys",
+      "extent": "parent",
+      "position": { "x": 30, "y": 210 },
+      "width": 220,
+      "height": 110,
+      "data": { "text": "Cette table stocke les utilisateurs.", "author": "Équipe" }
+    },
+    {
+      "id": "n-text",
+      "type": "text",
+      "position": { "x": 0, "y": -60 },
+      "width": 220,
+      "height": 48,
+      "data": { "text": "Modèle de données", "fontSize": 20 }
+    },
+    {
+      "id": "n-user",
+      "type": "erTable",
+      "position": { "x": 600, "y": 40 },
+      "data": {
+        "label": "Utilisateur",
+        "columns": [
+          { "name": "id", "type": "uuid", "key": "PK" },
+          { "name": "email", "type": "text" },
+          { "name": "créé_le", "type": "timestamp" }
+        ]
+      }
+    }
+  ],
+  "edges": [
+    {
+      "id": "e-text-user",
+      "type": "labeled",
+      "source": "n-text",
+      "target": "n-user",
+      "data": { "label": "décrit" }
+    },
+    {
+      "id": "e-sys-user",
+      "type": "labeled",
+      "source": "g-sys",
+      "target": "n-user",
+      "data": { "label": "utilise", "dashed": true }
+    }
+  ]
+}

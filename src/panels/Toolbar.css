@@ -1,0 +1,194 @@
+.tb-bar {
+  position: relative;
+  z-index: 100;
+  height: var(--topbar-h);
+  flex: 0 0 var(--topbar-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+  padding: 0 12px;
+  background: var(--bg-titlebar);
+  border-bottom: 1px solid var(--hairline);
+  user-select: none;
+}
+
+.tb-zone {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+.tb-zone-left,
+.tb-zone-right {
+  flex: 0 0 auto;
+  position: relative;
+  z-index: 1;
+}
+.tb-zone-right {
+  gap: 2px;
+}
+.tb-zone-left .win-controls {
+  margin-right: 8px;
+}
+
+/* icon buttons */
+.tb-btn {
+  width: 30px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s, transform 0.08s;
+}
+.tb-btn:hover {
+  background: var(--fill);
+  color: var(--text);
+}
+.tb-btn:active {
+  background: var(--fill-hover);
+  transform: scale(0.94);
+}
+.tb-btn[data-active='true'] {
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* zone divider: soft hairline, framing controls · tabs (single, after the menu) */
+.tb-sep {
+  flex: 0 0 auto;
+  width: 1px;
+  height: 20px;
+  margin: 0 2px;
+  background: var(--hairline);
+  border-radius: 1px;
+}
+
+/* compact status (was the bottom bar) — muted, right of the toolbar */
+.tb-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--text-quaternary);
+  white-space: nowrap;
+  user-select: none;
+  font-variant-numeric: tabular-nums;
+}
+.tb-status-zoom {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+/* section switcher (segmented control with a sliding indicator) */
+.tb-tabs {
+  position: relative;
+  display: flex;
+  gap: 0;
+  padding: 2px;
+  background: var(--fill);
+  border-radius: var(--radius-sm);
+}
+.tb-tab-indicator {
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  border-radius: 5px;
+  background: var(--bg-window);
+  box-shadow: var(--shadow-seg);
+  transition: transform 0.26s var(--ease);
+  pointer-events: none;
+}
+.tb-tab {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 12px;
+  border: none;
+  background: transparent;
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  border-radius: 5px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.15s var(--ease);
+}
+.tb-tab:hover {
+  color: var(--text);
+}
+.tb-tab[data-active='true'] {
+  color: var(--text);
+}
+
+
+/* the single share entry point (top-right) */
+.tb-share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-width: 30px;
+  height: 28px;
+  padding: 0 7px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: background 0.13s, color 0.13s;
+}
+.tb-share:hover { background: var(--fill); color: var(--text); }
+.tb-share[data-on='true'] { color: var(--accent); background: var(--accent-soft); }
+.tb-share-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--orange);
+  animation: share-pulse 1.4s ease-in-out infinite;
+}
+.tb-share-dot[data-state='live'] { background: var(--green); }
+@keyframes share-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 color-mix(in srgb, currentColor 0%, transparent); }
+  50% { opacity: 0.45; }
+}
+.tb-share-count {
+  font-size: 11px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* connexions button (replaces the node/link counters) */
+.tb-connections {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 26px;
+  padding: 0 8px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: background 0.13s, color 0.13s;
+}
+.tb-connections:hover { background: var(--fill); color: var(--text); }
+.tb-conn-count { color: var(--text-secondary); }

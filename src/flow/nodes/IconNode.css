@@ -1,0 +1,116 @@
+.ic-node-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 9px 11px;
+  width: 100%;
+  height: 100%;
+  min-width: 76px;
+  min-height: 76px;
+  border-radius: var(--radius);
+  background: var(--surface);
+  border: 0.5px solid var(--hairline);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow 0.16s var(--ease), transform 0.16s var(--ease);
+}
+
+.ic-node-card:hover {
+  box-shadow: var(--shadow-pop);
+}
+
+.ic-node-selected,
+.ic-node-selected:hover {
+  box-shadow: 0 0 0 2px var(--accent), var(--shadow-card);
+}
+
+.ic-node-glyph {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  line-height: 0;
+}
+
+.ic-node-label {
+  max-width: 100%;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 550;
+  line-height: 1.25;
+  text-align: center;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ic-node-sub {
+  max-width: 100%;
+  font-family: var(--font);
+  font-size: 10.5px;
+  font-weight: 500;
+  line-height: 1.2;
+  text-align: center;
+  color: var(--text-tertiary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ic-node-handle.react-flow__handle {
+  width: 9px;
+  height: 9px;
+  background: var(--surface);
+  border: 1.5px solid var(--accent);
+  border-radius: 50%;
+  opacity: 0;
+  /* NOTE: never animate/override `transform` here — ReactFlow uses it to
+     center the handle on the node edge; a transform hover makes it jump. */
+  transition: opacity 0.16s var(--ease), background-color 0.12s var(--ease),
+    box-shadow 0.12s var(--ease);
+}
+
+.ic-node-card:hover .ic-node-handle.react-flow__handle,
+.ic-node-selected .ic-node-handle.react-flow__handle {
+  opacity: 1;
+}
+
+.ic-node-handle.react-flow__handle:hover {
+  background: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* user-uploaded picture: just the image — no card background — resizable + aspect-locked */
+.ic-image-card {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  border-radius: var(--radius-xs);
+  overflow: hidden;
+  background: transparent;
+}
+.ic-image-card.ic-node-selected {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+/* optional background/frame behind the picture (toggled from the balloon) */
+.ic-image-card.ic-image-framed {
+  background: var(--surface);
+  padding: 6px;
+  border-radius: var(--radius-sm);
+  box-shadow: 0 0 0 0.5px var(--hairline), var(--shadow-card);
+}
+.ic-image-card.ic-image-framed.ic-node-selected {
+  box-shadow: 0 0 0 2px var(--accent), var(--shadow-card);
+}
+.ic-image {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  user-select: none;
+}

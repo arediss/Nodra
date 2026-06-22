@@ -1,0 +1,105 @@
+.plug-webnote {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 12px;
+}
+.plug-refresh {
+  margin-left: auto;
+}
+.set-card-title {
+  display: flex;
+  align-items: center;
+}
+
+.plug-list {
+  display: flex;
+  flex-direction: column;
+}
+.plug-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+}
+.plug-row + .plug-row {
+  border-top: 1px solid var(--hairline);
+}
+.plug-info {
+  flex: 1;
+  min-width: 0;
+}
+.plug-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.plug-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+.plug-version {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  font-family: var(--mono);
+}
+.plug-badge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 999px;
+  color: var(--green);
+  background: rgba(52, 199, 89, 0.14);
+}
+.plug-desc {
+  margin-top: 3px;
+  font-size: 12px;
+  color: var(--text-secondary);
+  line-height: 1.4;
+}
+.plug-meta {
+  margin-top: 6px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 5px;
+}
+.plug-author {
+  font-size: 11px;
+  color: var(--text-tertiary);
+  margin-right: 4px;
+}
+.plug-perm {
+  font-size: 10px;
+  font-weight: 500;
+  padding: 1px 6px;
+  border-radius: var(--radius-xs);
+  color: var(--text-secondary);
+  background: var(--fill);
+}
+.plug-actions {
+  flex: 0 0 auto;
+}
+.plug-btn {
+  white-space: nowrap;
+}
+/* Developer card: two dev-loop buttons that wrap on narrow panels. */
+.plug-dev-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 8px 0;
+}
+.set-sep {
+  border: none;
+  border-top: 1px solid var(--hairline);
+  margin: 14px 0;
+}
+/* Subtle "hot-reload actif" indicator on the Développeur tab. */
+.plug-hotreload {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--green);
+}
