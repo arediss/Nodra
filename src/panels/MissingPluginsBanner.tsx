@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useFlowStore } from '../store';
 import { useUiStore } from '../ui-store';
@@ -13,6 +14,7 @@ import './UpdateBanner.css';
  *  Data is already safe (UnknownNode); this is just the proactive fix prompt.
  *  Reacts to filePlugins (open another doc) and pluginManifests (after reload). */
 export function MissingPluginsBanner() {
+  const { t } = useTranslation();
   const filePlugins = useFlowStore((s) => s.filePlugins);
   // Don't evaluate until the first disk-plugin load attempt has resolved, else
   // the banner flashes a false "missing" before plugins finish registering.
@@ -41,16 +43,16 @@ export function MissingPluginsBanner() {
       const entries = await fetchRegistry();
       const entry = entries.find((e: RegistryEntry) => e.id === dep.id);
       if (!entry) {
-        useUiStore.getState().showToast('Plugin absent du catalogue');
+        useUiStore.getState().showToast(t('banner.pluginNotInCatalog'));
         return;
       }
       await installPlugin(entry);
       useUiStore.getState().setPluginsDirty(true);
-      useUiStore.getState().showToast(`${entry.name} installé`);
+      useUiStore.getState().showToast(t('banner.pluginInstalled', { name: entry.name }));
       // User acted — hide this banner; PluginsReloadBanner now drives the reload.
       setDismissed(true);
     } catch (e) {
-      useUiStore.getState().showToast(`Échec : ${(e as Error).message}`);
+      useUiStore.getState().showToast(t('banner.installFailed', { error: (e as Error).message }));
     } finally {
       setBusy(null);
     }
@@ -65,7 +67,7 @@ export function MissingPluginsBanner() {
         <Icon icon="mdi:puzzle-remove-outline" width={14} height={14} />
       </span>
       <span className="update-banner-text">
-        Cette fiche utilise des plugins non installés : {names}
+        {t('banner.missingPlugins', { names })}
       </span>
       {installable && (
         <button
@@ -74,7 +76,7 @@ export function MissingPluginsBanner() {
           disabled={busy === installable.id}
           onClick={() => void onInstall(installable)}
         >
-          {busy === installable.id ? '…' : 'Installer'}
+          {busy === installable.id ? '…' : t('banner.install')}
         </button>
       )}
       <button
@@ -82,12 +84,12 @@ export function MissingPluginsBanner() {
         className="btn update-banner-action"
         onClick={() => useUiStore.getState().openSettings('plugins')}
       >
-        Gérer les plugins
+        {t('banner.managePlugins')}
       </button>
       <button
         type="button"
         className="update-banner-close"
-        aria-label="Ignorer"
+        aria-label={t('banner.dismiss')}
         onClick={() => setDismissed(true)}
       >
         <Icon icon="mdi:close" width={15} height={15} />

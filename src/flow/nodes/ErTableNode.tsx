@@ -1,4 +1,5 @@
 import { useState, useCallback, type CSSProperties } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Handle,
   Position,
@@ -13,6 +14,7 @@ import './ErTableNode.css';
 const KEY_OPTIONS: ErColumn['key'][] = [null, 'PK', 'FK'];
 
 export function ErTableNode({ id, data, selected }: NodeProps<ErTableNodeType>) {
+  const { t } = useTranslation();
   const updateNodeData = useFlowStore((s) => s.updateNodeData);
   const [editing, setEditing] = useState(false);
 
@@ -40,8 +42,8 @@ export function ErTableNode({ id, data, selected }: NodeProps<ErTableNodeType>) 
   );
 
   const addColumn = useCallback(
-    () => setColumns([...data.columns, { name: 'colonne', type: 'text', key: null }]),
-    [data.columns, setColumns],
+    () => setColumns([...data.columns, { name: t('er.column.defaultName'), type: 'text', key: null }]),
+    [data.columns, setColumns, t],
   );
 
   const onKeyDown = useCallback((e: React.KeyboardEvent) => {
@@ -70,7 +72,7 @@ export function ErTableNode({ id, data, selected }: NodeProps<ErTableNodeType>) 
           <input
             className="input nodrag er-header-input"
             value={data.label}
-            placeholder="Table"
+            placeholder={t('er.tablePlaceholder')}
             autoFocus
             onChange={(e) => updateNodeData(id, { label: e.target.value })}
           />
@@ -94,7 +96,7 @@ export function ErTableNode({ id, data, selected }: NodeProps<ErTableNodeType>) 
                 <input
                   className="input nodrag er-input-name"
                   value={col.name}
-                  placeholder="nom"
+                  placeholder={t('er.column.namePlaceholder')}
                   onChange={(e) => patchColumn(i, { name: e.target.value })}
                 />
                 <select
@@ -115,13 +117,13 @@ export function ErTableNode({ id, data, selected }: NodeProps<ErTableNodeType>) 
                 <input
                   className="input nodrag er-input-type"
                   value={col.type}
-                  placeholder="type"
+                  placeholder={t('er.column.typePlaceholder')}
                   onChange={(e) => patchColumn(i, { type: e.target.value })}
                 />
                 <button
                   type="button"
                   className="btn-icon btn-danger nodrag er-remove"
-                  title="Supprimer la colonne"
+                  title={t('er.removeColumn')}
                   onClick={() => removeColumn(i)}
                 >
                   <Icon icon="mdi:close" width={14} height={14} />
@@ -152,18 +154,18 @@ export function ErTableNode({ id, data, selected }: NodeProps<ErTableNodeType>) 
       {editing ? (
         <div className="er-edit-footer">
           <button type="button" className="btn-ghost nodrag er-add" onClick={addColumn}>
-            + Ajouter une colonne
+            {t('er.addColumn')}
           </button>
           <button
             type="button"
             className="btn-primary nodrag er-done"
             onClick={() => setEditing(false)}
           >
-            Terminé
+            {t('er.done')}
           </button>
         </div>
       ) : (
-        <div className="er-hint muted">Double-clic pour éditer</div>
+        <div className="er-hint muted">{t('er.editHint')}</div>
       )}
     </div>
   );

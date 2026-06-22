@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useDocsStore } from '../docs-store';
 import { useUiStore } from '../ui-store';
@@ -17,6 +18,7 @@ const caret = (open: boolean) =>
   open ? 'mdi:chevron-down' : 'mdi:chevron-right';
 
 export function HamburgerMenu() {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const [section, setSection] = useState<Section | null>(null);
   const rootRef = useRef<HTMLDivElement>(null);
@@ -72,19 +74,25 @@ export function HamburgerMenu() {
         hint: `.${def.ext}`,
         run: ((n: string) => runExporter(def, n)) as ExportFn,
       })),
-      { key: 'png', icon: 'mdi:image-outline', label: 'Image PNG', hint: '.png', run: exportPng },
-      { key: 'svg', icon: 'mdi:vector-square', label: 'Image SVG', hint: '.svg', run: exportSvg },
+      { key: 'png', icon: 'mdi:image-outline', label: t('menu.exportPng'), hint: '.png', run: exportPng },
+      { key: 'svg', icon: 'mdi:vector-square', label: t('menu.exportSvg'), hint: '.svg', run: exportSvg },
     ],
-    [expVersion],
+    [expVersion, t],
   );
 
   const doExport = async (fn: ExportFn) => {
     close();
     try {
       const r = await fn(diagramName);
-      showToast(r.saved ? `Exporté${r.path ? ' : ' + r.path : ''}` : 'Export annulé');
+      showToast(
+        r.saved
+          ? r.path
+            ? t('menu.exportedTo', { path: r.path })
+            : t('menu.exported')
+          : t('menu.exportCancelled'),
+      );
     } catch {
-      showToast("Échec de l'export");
+      showToast(t('menu.exportFailed'));
     }
   };
 
@@ -93,7 +101,7 @@ export function HamburgerMenu() {
       <button
         type="button"
         className="tb-btn"
-        data-tip="Menu"
+        data-tip={t('menu.menu')}
         aria-haspopup="menu"
         aria-expanded={open}
         onClick={() => (open ? close() : setOpen(true))}
@@ -113,7 +121,7 @@ export function HamburgerMenu() {
             }}
           >
             <Icon className="ham-ic" icon="mdi:file-plus-outline" width={16} height={16} />
-            <span className="ham-label">Nouveau</span>
+            <span className="ham-label">{t('menu.new')}</span>
           </button>
 
           <button
@@ -123,7 +131,7 @@ export function HamburgerMenu() {
             onClick={() => toggle('open')}
           >
             <Icon className="ham-ic" icon="mdi:folder-open-outline" width={16} height={16} />
-            <span className="ham-label">Ouvrir</span>
+            <span className="ham-label">{t('menu.open')}</span>
             <Icon className="ham-caret" icon={caret(section === 'open')} width={15} height={15} />
           </button>
           {section === 'open' && (
@@ -149,14 +157,14 @@ export function HamburgerMenu() {
           <button
             type="button"
             className="ham-item"
-            title={`Formats : ${importHint}`}
+            title={t('menu.formats', { formats: importHint })}
             onClick={() => {
               openFromFile();
               close();
             }}
           >
             <Icon className="ham-ic" icon="mdi:tray-arrow-down" width={16} height={16} />
-            <span className="ham-label">Importer…</span>
+            <span className="ham-label">{t('menu.import')}</span>
             {/* Formats live in the button title (hover): the list grows with each
                 installed importer plugin and would otherwise crush the label. */}
           </button>
@@ -168,7 +176,7 @@ export function HamburgerMenu() {
             onClick={() => toggle('export')}
           >
             <Icon className="ham-ic" icon="mdi:tray-arrow-up" width={16} height={16} />
-            <span className="ham-label">Exporter</span>
+            <span className="ham-label">{t('menu.export')}</span>
             <Icon className="ham-caret" icon={caret(section === 'export')} width={15} height={15} />
           </button>
           {section === 'export' && (
@@ -199,7 +207,7 @@ export function HamburgerMenu() {
             }}
           >
             <Icon className="ham-ic" icon="mdi:cog-outline" width={16} height={16} />
-            <span className="ham-label">Réglages</span>
+            <span className="ham-label">{t('menu.settings')}</span>
           </button>
         </div>
       )}

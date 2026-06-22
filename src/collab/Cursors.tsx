@@ -1,4 +1,5 @@
 import { useStore } from '@xyflow/react';
+import { useTranslation } from 'react-i18next';
 import { usePresenceStore } from './presence';
 import { useDocsStore } from '../docs-store';
 import './Cursors.css';
@@ -10,6 +11,7 @@ import './Cursors.css';
  * Only peers viewing the SAME shared doc as us (with a known cursor) are shown.
  */
 export function Cursors() {
+  const { t } = useTranslation();
   const peers = usePresenceStore((s) => s.peers);
   const activeId = useDocsStore((s) => s.activeId);
   const transform = useStore((s) => s.transform); // [x, y, zoom]
@@ -32,7 +34,7 @@ export function Cursors() {
               />
             </svg>
             <span className="cursor-label" style={{ background: p.color }}>
-              {p.name || 'Pair'}
+              {p.name || t('collab.peer')}
             </span>
           </div>
         );

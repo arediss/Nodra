@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useStore } from '@xyflow/react';
 import { useFlowStore, newId } from '../store';
@@ -30,6 +31,7 @@ const NOTE_COLORS: { id: NoteColor; hex: string }[] = [
 type Pos = { x: number; y: number };
 
 export function SelectionBalloon() {
+  const { t } = useTranslation();
   const selectedNodeId = useFlowStore((s) => s.selectedNodeId);
   const selectedEdgeId = useFlowStore((s) => s.selectedEdgeId);
   const nodes = useFlowStore((s) => s.nodes);
@@ -96,8 +98,8 @@ export function SelectionBalloon() {
     <button
       type="button"
       className="btn-icon"
-      title="Dupliquer"
-      aria-label="Dupliquer"
+      title={t('common.duplicate')}
+      aria-label={t('common.duplicate')}
       onClick={() => duplicate(n)}
     >
       <Icon icon="mdi:content-copy" width={16} height={16} />
@@ -108,8 +110,8 @@ export function SelectionBalloon() {
     <button
       type="button"
       className="btn-icon btn-danger"
-      title="Supprimer"
-      aria-label="Supprimer"
+      title={t('common.delete')}
+      aria-label={t('common.delete')}
       onClick={remove}
     >
       <Icon icon="mdi:trash-can-outline" width={16} height={16} />
@@ -128,8 +130,8 @@ export function SelectionBalloon() {
           type="button"
           className="btn-icon"
           data-active={framed}
-          title={framed ? 'Retirer le fond' : 'Ajouter un fond'}
-          aria-label="Fond du bloc image"
+          title={framed ? t('node.image.removeBackground') : t('node.image.addBackground')}
+          aria-label={t('node.image.background')}
           onClick={() =>
             useFlowStore.getState().updateNodeData(node.id, { imageFramed: !framed })
           }
@@ -141,8 +143,8 @@ export function SelectionBalloon() {
           type="button"
           className="btn-icon"
           data-active={imgTags > 0}
-          title="Détails (tags, métadonnées)"
-          aria-label="Détails"
+          title={t('node.details.tooltip')}
+          aria-label={t('node.details.label')}
           onClick={() => useUiStore.getState().openDetails()}
         >
           <Icon icon="mdi:tag-multiple-outline" width={16} height={16} />
@@ -156,7 +158,7 @@ export function SelectionBalloon() {
     const tagCount = node.data.tags?.length ?? 0;
     body = (
       <>
-        <label className="selb-swatch" title="Couleur d'accent">
+        <label className="selb-swatch" title={t('node.accentColor')}>
           <input
             type="color"
             value={accent ?? DEFAULT_ACCENT}
@@ -171,8 +173,8 @@ export function SelectionBalloon() {
           <button
             type="button"
             className="btn-icon selb-reset"
-            title="Réinitialiser la couleur"
-            aria-label="Réinitialiser la couleur"
+            title={t('node.resetColor')}
+            aria-label={t('node.resetColor')}
             onClick={() =>
               useFlowStore.getState().updateNodeData(node.id, {
                 accent: undefined,
@@ -187,8 +189,8 @@ export function SelectionBalloon() {
           type="button"
           className="btn-icon"
           data-active={tagCount > 0}
-          title="Détails (tags, métadonnées)"
-          aria-label="Détails"
+          title={t('node.details.tooltip')}
+          aria-label={t('node.details.label')}
           onClick={() => useUiStore.getState().openDetails()}
         >
           <Icon icon="mdi:tag-multiple-outline" width={16} height={16} />
@@ -203,7 +205,7 @@ export function SelectionBalloon() {
       <>
         <input
           className="input selb-name"
-          placeholder="Nom du groupe"
+          placeholder={t('node.group.namePlaceholder')}
           value={node.data.label}
           onChange={(e) =>
             useFlowStore.getState().updateNodeData(node.id, {
@@ -218,7 +220,7 @@ export function SelectionBalloon() {
             useFlowStore.getState().updateNodeData(node.id, { icon: ic })
           }
         />
-        <label className="selb-swatch" title="Couleur">
+        <label className="selb-swatch" title={t('node.color')}>
           <input
             type="color"
             value={color ?? DEFAULT_ACCENT}
@@ -237,7 +239,7 @@ export function SelectionBalloon() {
     const accent = node.data.accent;
     body = (
       <>
-        <label className="selb-swatch" title="Couleur d'accent">
+        <label className="selb-swatch" title={t('node.accentColor')}>
           <input
             type="color"
             value={accent ?? DEFAULT_ACCENT}
@@ -249,7 +251,7 @@ export function SelectionBalloon() {
           />
         </label>
         <span className="muted selb-hint">
-          double-clic pour éditer les colonnes
+          {t('node.er.editColumnsHint')}
         </span>
         <Divider />
         <DuplicateBtn n={node} />
@@ -296,7 +298,7 @@ export function SelectionBalloon() {
       <>
         <input
           className="input selb-edge-label"
-          placeholder="Libellé"
+          placeholder={t('node.edge.labelPlaceholder')}
           value={edge.data?.label ?? ''}
           onChange={(e) =>
             useFlowStore.getState().updateEdge(edge.id, {
@@ -312,7 +314,11 @@ export function SelectionBalloon() {
               type="button"
               data-active={(edge.data?.pathType ?? 'smooth') === pt}
               title={
-                pt === 'smooth' ? 'Angles' : pt === 'bezier' ? 'Courbe' : 'Droit'
+                pt === 'smooth'
+                  ? t('node.edge.path.angled')
+                  : pt === 'bezier'
+                    ? t('node.edge.path.curved')
+                    : t('node.edge.path.straight')
               }
               onClick={() =>
                 useFlowStore.getState().updateEdge(edge.id, { pathType: pt })
@@ -336,8 +342,8 @@ export function SelectionBalloon() {
           type="button"
           className="btn-icon"
           data-active={dashed}
-          title="Pointillé"
-          aria-label="Pointillé"
+          title={t('node.edge.dashed')}
+          aria-label={t('node.edge.dashed')}
           onClick={() =>
             useFlowStore.getState().updateEdge(edge.id, { dashed: !dashed })
           }
@@ -347,7 +353,7 @@ export function SelectionBalloon() {
         <Divider />
         <select
           className="selb-kind"
-          title="Type de relation"
+          title={t('node.edge.relationType')}
           value={edge.data?.edgeKind ?? ''}
           onChange={(e) =>
             useFlowStore.getState().updateEdge(edge.id, {
@@ -355,12 +361,12 @@ export function SelectionBalloon() {
             })
           }
         >
-          <option value="">Type…</option>
-          <option value="sync">Synchrone</option>
-          <option value="async">Asynchrone</option>
-          <option value="event">Événement</option>
-          <option value="error">Erreur</option>
-          <option value="data">Données</option>
+          <option value="">{t('node.edge.kind.none')}</option>
+          <option value="sync">{t('node.edge.kind.sync')}</option>
+          <option value="async">{t('node.edge.kind.async')}</option>
+          <option value="event">{t('node.edge.kind.event')}</option>
+          <option value="error">{t('node.edge.kind.error')}</option>
+          <option value="data">{t('node.edge.kind.data')}</option>
         </select>
         <Divider />
         <DeleteBtn />

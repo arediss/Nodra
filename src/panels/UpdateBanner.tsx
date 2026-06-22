@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useFlowStore } from '../store';
 import { useComponentsStore } from '../components-store';
@@ -7,6 +8,7 @@ import './UpdateBanner.css';
 type CompData = { componentId?: string; componentVersion?: number };
 
 export function UpdateBanner() {
+  const { t } = useTranslation();
   const nodes = useFlowStore((s) => s.nodes);
   const defs = useComponentsStore((s) => s.defs);
   const [dismissed, setDismissed] = useState(false);
@@ -24,10 +26,7 @@ export function UpdateBanner() {
 
   if (count === 0 || dismissed) return null;
 
-  const label =
-    count === 1
-      ? '1 bloc de composant à mettre à jour'
-      : `${count} blocs de composant à mettre à jour`;
+  const label = t('update.outdatedBlocks', { count });
 
   return (
     <div className="update-banner" role="status">
@@ -40,12 +39,12 @@ export function UpdateBanner() {
         className="btn btn-primary update-banner-action"
         onClick={() => useComponentsStore.getState().updateAllInstances()}
       >
-        Mettre à jour
+        {t('update.action')}
       </button>
       <button
         type="button"
         className="update-banner-close"
-        aria-label="Ignorer"
+        aria-label={t('update.dismiss')}
         onClick={() => setDismissed(true)}
       >
         <Icon icon="mdi:close" width={15} height={15} />

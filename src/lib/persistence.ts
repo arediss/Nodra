@@ -2,6 +2,7 @@ import { useFlowStore } from '../store';
 import { useDocsStore } from '../docs-store';
 import { useUiStore } from '../ui-store';
 import * as registries from '../plugins/registries';
+import { i18n } from '../i18n';
 import type { DiagramFile } from '../types';
 
 const KEY = 'pfd:autosave';
@@ -124,11 +125,11 @@ export function openFromFile(): void {
         try {
           result = await def.parse(text);
         } catch {
-          toast(`Échec de l'import (${def.label}).`);
+          toast(i18n.t('file.importFailed', { label: def.label }));
           return;
         }
         if (!result || result.diagram.nodes.length === 0) {
-          toast(`Rien à importer depuis « ${file.name} ».`);
+          toast(i18n.t('file.importNothing', { name: file.name }));
           return;
         }
         if (result.replace) {
@@ -145,16 +146,16 @@ export function openFromFile(): void {
       try {
         parsed = JSON.parse(text);
       } catch {
-        toast('Format de fichier non reconnu.');
+        toast(i18n.t('file.unrecognizedFormat'));
         return;
       }
       if (!isDiagramFile(parsed)) {
-        toast('Fichier invalide : pas un diagramme Nodra.');
+        toast(i18n.t('file.notADiagram'));
         return;
       }
       useFlowStore.getState().loadDiagram(parsed);
     };
-    reader.onerror = () => toast('Erreur lors de la lecture du fichier.');
+    reader.onerror = () => toast(i18n.t('file.readError'));
     reader.readAsText(file);
   });
 

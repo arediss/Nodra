@@ -2,6 +2,7 @@ import { buildHost } from './host';
 import type { DevSource } from './host';
 import { API_VERSION } from './types';
 import type { Host, PluginManifest, PluginModule } from './types';
+import { i18n } from '../i18n';
 
 const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 
@@ -303,12 +304,12 @@ async function watchTick(): Promise<void> {
         // A newly-appeared enabled plugin -> load it.
         await reloadDevPlugin(id);
         console.log(`[plugins] dev plugin ${id} apparu — chargé`);
-        showToastSafe(`${id} chargé`);
+        showToastSafe(i18n.t('loader.pluginLoaded', { id }));
       } else if (prev !== sig) {
         // Built code changed -> reload just this one.
         await reloadDevPlugin(id);
         console.log(`[plugins] dev plugin ${id} rechargé (changement détecté)`);
-        showToastSafe(`${id} rechargé`);
+        showToastSafe(i18n.t('loader.pluginReloaded', { id }));
       }
     }
 

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type DragEvent } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   ReactFlow,
   Background,
@@ -34,6 +35,7 @@ const defaultEdgeOptions = {
 const snapGrid: [number, number] = [8, 8];
 
 export function Canvas() {
+  const { t } = useTranslation();
   const rf = useReactFlow();
   const updateNodeInternals = useUpdateNodeInternals();
 
@@ -139,20 +141,20 @@ export function Canvas() {
       selectNode(node.id);
       const items: MenuItem[] = [
         {
-          label: 'Dupliquer',
+          label: t('common.duplicate'),
           icon: 'mdi:content-copy',
           onClick: () => duplicateNode(node.id),
         },
       ];
       if (node.parentId) {
         items.push({
-          label: 'Retirer du groupe',
+          label: t('canvas.detachFromGroup'),
           icon: 'mdi:arrow-up-box',
           onClick: () => detachFromGroup(node.id),
         });
       }
       items.push({
-        label: 'Supprimer',
+        label: t('common.delete'),
         icon: 'mdi:trash-can-outline',
         danger: true,
         separatorBefore: true,
@@ -160,7 +162,7 @@ export function Canvas() {
       });
       setCtx({ x: e.clientX, y: e.clientY, items });
     },
-    [selectNode, duplicateNode, detachFromGroup, deleteSelection, editable],
+    [selectNode, duplicateNode, detachFromGroup, deleteSelection, editable, t],
   );
 
   const inSession = collabRole !== null;

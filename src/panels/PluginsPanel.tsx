@@ -9,6 +9,7 @@ import {
   type InstalledPlugin,
 } from '../plugins/manage';
 import { useUiStore } from '../ui-store';
+import { useTranslation, Trans } from 'react-i18next';
 import './PluginsPanel.css';
 
 type Row = {
@@ -68,6 +69,7 @@ function mergeRows(entries: RegistryEntry[], installed: InstalledPlugin[]): Row[
 }
 
 export function PluginsPanel() {
+  const { t } = useTranslation();
   const showToast = useUiStore((s) => s.showToast);
   const setPluginsDirty = useUiStore((s) => s.setPluginsDirty);
   const [rows, setRows] = useState<Row[]>([]);
@@ -96,10 +98,10 @@ export function PluginsPanel() {
     try {
       await installPlugin(row.entry);
       setPluginsDirty(true);
-      showToast(`${row.name} installé`);
+      showToast(t('pluginspanel.installedToast', { name: row.name }));
       await refresh();
     } catch (e) {
-      showToast(`Échec : ${(e as Error).message}`);
+      showToast(t('pluginspanel.failed', { message: (e as Error).message }));
     } finally {
       setBusy(null);
     }
@@ -110,10 +112,10 @@ export function PluginsPanel() {
     try {
       await removePlugin(row.id);
       setPluginsDirty(true);
-      showToast(`${row.name} désinstallé`);
+      showToast(t('pluginspanel.removedToast', { name: row.name }));
       await refresh();
     } catch (e) {
-      showToast(`Échec : ${(e as Error).message}`);
+      showToast(t('pluginspanel.failed', { message: (e as Error).message }));
     } finally {
       setBusy(null);
     }
@@ -123,33 +125,36 @@ export function PluginsPanel() {
     <>
       {!isDesktop && (
         <p className="muted set-p plug-webnote">
-          <Icon icon="mdi:information-outline" width={14} height={14} /> Parcours le catalogue
-          ici ; l'installation se fait depuis l'app bureau (Tauri).
+          <Icon icon="mdi:information-outline" width={14} height={14} /> {t('pluginspanel.webNote')}
         </p>
       )}
 
       <section className="set-card">
         <div className="set-card-title">
-          Catalogue
+          {t('pluginspanel.catalogTitle')}
           <button
             type="button"
             className="btn-icon plug-refresh"
-            title="Rafraîchir"
-            aria-label="Rafraîchir"
+            title={t('pluginspanel.refresh')}
+            aria-label={t('pluginspanel.refresh')}
             onClick={() => void refresh()}
           >
             <Icon icon="mdi:refresh" width={15} height={15} />
           </button>
         </div>
         <div className="set-card-body">
-          {status === 'loading' && <p className="muted">Chargement du catalogue…</p>}
+          {status === 'loading' && <p className="muted">{t('pluginspanel.loadingCatalog')}</p>}
           {status === 'error' && (
             <p className="muted">
-              Catalogue injoignable (<code>{registryUrl()}</code>). Réessaie plus tard.
+              <Trans
+                i18nKey="pluginspanel.catalogUnreachable"
+                values={{ url: registryUrl() }}
+                components={{ c: <code /> }}
+              />
             </p>
           )}
           {status === 'ready' && rows.length === 0 && (
-            <p className="muted">Aucun plugin disponible pour l'instant.</p>
+            <p className="muted">{t('pluginspanel.empty')}</p>
           )}
 
           <div className="plug-list">
@@ -165,7 +170,7 @@ export function PluginsPanel() {
                       <span className="plug-version">v{row.installed ?? row.version}</span>
                       {row.installed && (
                         <span className="plug-badge" data-on>
-                          Installé
+                          {t('pluginspanel.installedBadge')}
                         </span>
                       )}
                     </div>
@@ -187,7 +192,7 @@ export function PluginsPanel() {
                         disabled={!isDesktop || isBusy}
                         onClick={() => void onInstall(row)}
                       >
-                        {isBusy ? '…' : `Mettre à jour → v${row.entry!.version}`}
+                        {isBusy ? '…' : t('pluginspanel.update', { version: row.entry!.version })}
                       </button>
                     )}
                     {!row.installed && row.entry && (
@@ -197,7 +202,7 @@ export function PluginsPanel() {
                         disabled={!isDesktop || isBusy}
                         onClick={() => void onInstall(row)}
                       >
-                        {isBusy ? '…' : 'Installer'}
+                        {isBusy ? '…' : t('pluginspanel.install')}
                       </button>
                     )}
                     {row.installed && (
@@ -207,7 +212,7 @@ export function PluginsPanel() {
                         disabled={!isDesktop || isBusy}
                         onClick={() => void onRemove(row)}
                       >
-                        {isBusy ? '…' : 'Désinstaller'}
+                        {isBusy ? '…' : t('pluginspanel.uninstall')}
                       </button>
                     )}
                   </div>

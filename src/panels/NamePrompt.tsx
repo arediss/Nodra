@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useCollabStore } from '../collab/session';
 import { setPeerName } from '../collab/presence';
@@ -20,6 +21,7 @@ const chosenName = (): string => {
  * persists in localStorage so it never asks again.
  */
 export function NamePrompt() {
+  const { t } = useTranslation();
   const role = useCollabStore((s) => s.role);
   const [dismissed, setDismissed] = useState(false);
   const [name, setName] = useState(chosenName);
@@ -28,7 +30,7 @@ export function NamePrompt() {
   if (!needsName) return null;
 
   const submit = () => {
-    setPeerName(name.trim() || (role === 'host' ? 'Hôte' : 'Invité'));
+    setPeerName(name.trim() || (role === 'host' ? t('name.host') : t('name.guest')));
     setDismissed(true);
   };
 
@@ -38,27 +40,27 @@ export function NamePrompt() {
         className="sheet sheet-sm"
         onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
-        aria-label="Ton prénom"
+        aria-label={t('name.prompt.title')}
       >
         <div className="sheet-header">
           <Icon icon="lucide:user" width={18} height={18} />
-          <h2 className="sheet-title">Bienvenue 👋</h2>
+          <h2 className="sheet-title">{t('name.prompt.welcome')}</h2>
         </div>
         <div className="sheet-body">
           <label className="shr-label" htmlFor="np-name">
-            Comment tu t'appelles ? (visible par les autres)
+            {t('name.prompt.question')}
           </label>
           <input
             id="np-name"
             className="input"
-            placeholder="ex. Quentin"
+            placeholder={t('name.prompt.placeholder')}
             value={name}
             autoFocus
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && submit()}
           />
           <button type="button" className="btn btn-primary shr-action" onClick={submit}>
-            Rejoindre la session
+            {t('name.prompt.join')}
           </button>
         </div>
       </div>

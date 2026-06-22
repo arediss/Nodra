@@ -2,6 +2,7 @@ import { toPng, toSvg } from 'html-to-image';
 import { getNodesBounds, getViewportForBounds } from '@xyflow/react';
 import { useFlowStore } from '../store';
 import { saveBytes, dataUrlBytes, type SaveResult } from './save';
+import { i18n } from '../i18n';
 
 // JSON / draw.io / Mermaid export now go through the exporters registry (pure
 // doc -> string). PNG/SVG stay here: they snapshot the live ReactFlow DOM.
@@ -67,7 +68,7 @@ export async function exportPng(fileName: string): Promise<SaveResult> {
   });
   const bytes = await dataUrlBytes(dataUrl);
   return saveBytes(sanitizeFileName(fileName) + '.png', bytes, [
-    { name: 'Image PNG', extensions: ['png'] },
+    { name: i18n.t('export.pngImage'), extensions: ['png'] },
   ]);
 }
 
@@ -82,7 +83,7 @@ export async function exportSvg(fileName: string): Promise<SaveResult> {
   });
   const bytes = await dataUrlBytes(dataUrl);
   return saveBytes(sanitizeFileName(fileName) + '.svg', bytes, [
-    { name: 'Image SVG', extensions: ['svg'] },
+    { name: i18n.t('export.svgImage'), extensions: ['svg'] },
   ]);
 }
 

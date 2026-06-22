@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { createPortal } from 'react-dom';
 import { Icon } from '@iconify/react';
 import { useReactFlow, useStore } from '@xyflow/react';
@@ -9,6 +10,7 @@ import { Tooltip } from './Tooltip';
  *  the dock short. The popover is portaled to <body> so the dock's scroll
  *  container (overflow) can't clip it. */
 export function DockViewMenu() {
+  const { t } = useTranslation();
   const rf = useReactFlow();
   const zoom = useStore((s) => s.transform[2]);
   const canvasLocked = useUiStore((s) => s.canvasLocked);
@@ -46,13 +48,13 @@ export function DockViewMenu() {
 
   return (
     <div className="dock-menu">
-      <Tooltip label="Affichage" side="top">
+      <Tooltip label={t('toolbar.view')} side="top">
         <button
           ref={btnRef}
           type="button"
           className="dock-btn"
           data-active={open}
-          aria-label="Affichage"
+          aria-label={t('toolbar.view')}
           aria-expanded={open}
           onClick={() => (open ? setOpen(false) : openMenu())}
         >
@@ -77,7 +79,7 @@ export function DockViewMenu() {
               <button
                 type="button"
                 className="dock-pop-zbtn"
-                aria-label="Dézoomer"
+                aria-label={t('toolbar.zoomOut')}
                 onClick={() => rf.zoomOut({ duration: 160 })}
               >
                 <Icon icon="mdi:minus" width={18} height={18} />
@@ -85,7 +87,7 @@ export function DockViewMenu() {
               <button
                 type="button"
                 className="dock-pop-pct"
-                aria-label="Zoom 100 %"
+                aria-label={t('toolbar.zoomReset')}
                 onClick={() => rf.zoomTo(1, { duration: 160 })}
               >
                 {Math.round(zoom * 100)}%
@@ -93,7 +95,7 @@ export function DockViewMenu() {
               <button
                 type="button"
                 className="dock-pop-zbtn"
-                aria-label="Zoomer"
+                aria-label={t('toolbar.zoomIn')}
                 onClick={() => rf.zoomIn({ duration: 160 })}
               >
                 <Icon icon="mdi:plus" width={18} height={18} />
@@ -109,7 +111,7 @@ export function DockViewMenu() {
               }}
             >
               <Icon icon="mdi:fit-to-screen-outline" width={17} height={17} />
-              Ajuster à l'écran
+              {t('toolbar.fitView')}
             </button>
 
             <button
@@ -123,7 +125,7 @@ export function DockViewMenu() {
                 width={17}
                 height={17}
               />
-              {canvasLocked ? 'Déverrouiller le canvas' : 'Verrouiller le canvas'}
+              {canvasLocked ? t('toolbar.unlockCanvas') : t('toolbar.lockCanvas')}
               {canvasLocked && (
                 <Icon className="dock-pop-check" icon="mdi:check" width={15} height={15} />
               )}
@@ -136,20 +138,20 @@ export function DockViewMenu() {
               onClick={() => setPref('showMinimap', !showMinimap)}
             >
               <Icon icon="mdi:map-outline" width={17} height={17} />
-              Mini-carte
+              {t('toolbar.minimap')}
               {showMinimap && (
                 <Icon className="dock-pop-check" icon="mdi:check" width={15} height={15} />
               )}
             </button>
 
             <div className="dock-pop-grid">
-              <span className="dock-pop-glabel">Quadrillage</span>
+              <span className="dock-pop-glabel">{t('toolbar.grid')}</span>
               <div className="dock-pop-gseg">
                 {(
                   [
-                    { id: 'dots', icon: 'mdi:dots-grid', label: 'Points' },
-                    { id: 'lines', icon: 'mdi:grid', label: 'Lignes' },
-                    { id: 'none', icon: 'mdi:grid-off', label: 'Aucun' },
+                    { id: 'dots', icon: 'mdi:dots-grid', label: t('toolbar.gridDots') },
+                    { id: 'lines', icon: 'mdi:grid', label: t('toolbar.gridLines') },
+                    { id: 'none', icon: 'mdi:grid-off', label: t('toolbar.gridNone') },
                   ] as const
                 ).map((g) => (
                   <button
@@ -158,7 +160,7 @@ export function DockViewMenu() {
                     className="dock-pop-gbtn"
                     data-on={gridStyle === g.id}
                     title={g.label}
-                    aria-label={`Quadrillage ${g.label}`}
+                    aria-label={t('toolbar.gridOption', { option: g.label })}
                     onClick={() => setGridStyle(g.id)}
                   >
                     <Icon icon={g.icon} width={16} height={16} />
