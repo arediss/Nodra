@@ -142,7 +142,18 @@ const distDir = join(dir, 'dist');
 // Run after EVERY build so dist/ is always a complete, loadable plugin — once for
 // a one-shot build, on each rebuild in watch mode.
 const ASSET_EXT = /\.(json|svg|png|jpe?g|gif|webp|avif|woff2?|ttf|otf|wasm|txt|md)$/i;
-const SKIP = new Set(['dist', 'node_modules', 'manifest.json', 'plugin.zip', 'src']);
+// Repo-management files live next to manifest.json in a standalone plugin repo but
+// are NOT plugin assets — never ship them in the loadable dist/ or the zip.
+const SKIP = new Set([
+  'dist',
+  'node_modules',
+  'manifest.json',
+  'plugin.zip',
+  'src',
+  'package.json',
+  'package-lock.json',
+  'README.md',
+]);
 function writeDistMeta() {
   writeFileSync(
     join(distDir, 'manifest.json'),
