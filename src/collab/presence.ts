@@ -31,7 +31,7 @@ const PALETTE = [
 ];
 const colorFor = (id: string) => {
   let h = 0;
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) | 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + (id.codePointAt(i) ?? 0)) | 0;
   return PALETTE[Math.abs(h) % PALETTE.length];
 };
 

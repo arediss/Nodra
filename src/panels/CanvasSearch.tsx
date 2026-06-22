@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useReactFlow } from '@xyflow/react';
 import { useFlowStore } from '../store';
@@ -21,6 +22,7 @@ type Hit = { kind: 'node' | 'edge'; id: string; label: string };
  * edge labels, selects each hit and centres the viewport on it. ↑/↓ or Enter cycles.
  */
 export function CanvasSearch() {
+  const { t } = useTranslation();
   const rf = useReactFlow();
   const nodes = useFlowStore((s) => s.nodes);
   const edges = useFlowStore((s) => s.edges);
@@ -42,8 +44,8 @@ export function CanvasSearch() {
         requestAnimationFrame(() => inputRef.current?.select());
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    globalThis.addEventListener('keydown', onKey);
+    return () => globalThis.removeEventListener('keydown', onKey);
   }, []);
 
   const hits: Hit[] = useMemo(() => {
@@ -62,11 +64,11 @@ export function CanvasSearch() {
     }
     for (const e of edges) {
       if (edgeText(e).includes(q)) {
-        out.push({ kind: 'edge', id: e.id, label: e.data?.label ?? 'lien' });
+        out.push({ kind: 'edge', id: e.id, label: e.data?.label ?? t('search.linkFallback') });
       }
     }
     return out;
-  }, [query, nodes, edges]);
+  }, [query, nodes, edges, t]);
 
   const goTo = (i: number) => {
     const hit = hits[i];
@@ -122,13 +124,16 @@ export function CanvasSearch() {
 
   if (!open) return null;
 
+  let countLabel = '';
+  if (query) countLabel = hits.length ? `${active + 1}/${hits.length}` : '0';
+
   return (
     <div className="csearch" onPointerDown={(e) => e.stopPropagation()}>
       <Icon className="csearch-lead" icon="mdi:magnify" width={16} height={16} />
       <input
         ref={inputRef}
         className="csearch-input"
-        placeholder="Rechercher dans le diagramme…"
+        placeholder={t('search.placeholder')}
         value={query}
         autoFocus
         onChange={(e) => setQuery(e.target.value)}
@@ -143,12 +148,12 @@ export function CanvasSearch() {
         }}
       />
       <span className="csearch-count">
-        {query ? (hits.length ? `${active + 1}/${hits.length}` : '0') : ''}
+        {countLabel}
       </span>
       <button
         type="button"
         className="csearch-btn"
-        aria-label="Précédent"
+        aria-label={t('search.previous')}
         disabled={hits.length === 0}
         onClick={() => step(-1)}
       >
@@ -157,13 +162,13 @@ export function CanvasSearch() {
       <button
         type="button"
         className="csearch-btn"
-        aria-label="Suivant"
+        aria-label={t('search.next')}
         disabled={hits.length === 0}
         onClick={() => step(1)}
       >
         <Icon icon="mdi:chevron-down" width={16} height={16} />
       </button>
-      <button type="button" className="csearch-btn" aria-label="Fermer" onClick={close}>
+      <button type="button" className="csearch-btn" aria-label={t('common.close')} onClick={close}>
         <Icon icon="mdi:close" width={16} height={16} />
       </button>
     </div>

@@ -14,8 +14,6 @@ body {
   position: fixed;
   inset: 0;
   width: 100%;
-}
-body {
   font-family: var(--font);
   background: var(--bg-window);
   color: var(--text);
@@ -47,6 +45,8 @@ body {
   position: absolute;
   inset: 0;
   background: var(--canvas-bg);
+  /* part of the orchestrated load-in (see pfd-fade keyframes below) */
+  animation: pfd-fade 0.7s var(--ease-out) 0.05s both;
 }
 .react-flow {
   background: transparent;
@@ -522,9 +522,6 @@ html.is-tauri .app {
 }
 .tb-bar {
   animation: pfd-rise 0.55s var(--ease-out) both;
-}
-.canvas-wrap {
-  animation: pfd-fade 0.7s var(--ease-out) 0.05s both;
 }
 
 /* Connection handles for note/comment/text/group blocks (shared). Hidden until

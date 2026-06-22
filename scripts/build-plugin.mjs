@@ -56,7 +56,7 @@ if (!entry) {
   process.exit(1);
 }
 
-const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
 // Specifier -> window.__nodra key (the host's singletons).
 const SHARED = {
@@ -66,8 +66,17 @@ const SHARED = {
   'react/jsx-dev-runtime': 'jsxRuntime',
   '@xyflow/react': 'xyflow',
   '@iconify/react': 'iconify',
+  i18next: 'i18next',
+  'react-i18next': 'react-i18next',
 };
-const SHARED_ROOTS = ['react', 'react-dom', '@xyflow/react', '@iconify/react'];
+const SHARED_ROOTS = [
+  'react',
+  'react-dom',
+  '@xyflow/react',
+  '@iconify/react',
+  'i18next',
+  'react-i18next',
+];
 
 /** Resolve shared specifiers to a fail-fast CJS shim; forbid core + subpath imports. */
 const hostSharedShim = {
@@ -89,7 +98,7 @@ const hostSharedShim = {
 
     // Subpath of a shared package would bundle a SECOND copy (breaks the single
     // React/@xyflow instance) — reject it (the exact mappings above win first).
-    const sub = new RegExp('^(' + SHARED_ROOTS.map(esc).join('|') + ')\\/');
+    const sub = new RegExp('^(' + SHARED_ROOTS.map(esc).join('|') + String.raw`)\/`);
     b.onResolve({ filter: sub }, (a) => {
       if (a.path in SHARED) return undefined;
       return {

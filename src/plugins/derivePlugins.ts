@@ -4,6 +4,26 @@ import type { AppNode, DiagramPluginDep, IconNodeData } from '../types';
 const CORE = 'com.nodra.core';
 
 /**
+ * Index block refs to the set of non-core plugin sources that register them.
+ * Icon nodes reference a block by its ref, not its id, and several plugins may
+ * register the same ref — keep them all so none is dropped.
+ */
+function buildRefSources(): Map<string, Set<string>> {
+  const refSources = new Map<string, Set<string>>();
+  for (const [id, entry] of reg.blocks.entries()) {
+    const src = reg.blocks.sourceOf(id);
+    if (!src || src === CORE) continue;
+    let set = refSources.get(entry.ref);
+    if (!set) {
+      set = new Set();
+      refSources.set(entry.ref, set);
+    }
+    set.add(src);
+  }
+  return refSources;
+}
+
+/**
  * Derive which plugins a diagram depends on, by mapping each node back to the
  * plugin that registered it: a node's type → nodeTypes source, an icon node's
  * `iconRef` → the block that owns that ref → its source. Core contributions are
@@ -26,15 +46,7 @@ export function derivePlugins(
   for (const n of nodes) add(reg.nodeTypes.sourceOf(n.type ?? 'default'));
 
   // Icon nodes reference a block by its ref, not its id — index ref → sources.
-  // Several plugins may register the same ref; keep them all so none is dropped.
-  const refSources = new Map<string, Set<string>>();
-  for (const [id, entry] of reg.blocks.entries()) {
-    const src = reg.blocks.sourceOf(id);
-    if (!src || src === CORE) continue;
-    let set = refSources.get(entry.ref);
-    if (!set) refSources.set(entry.ref, (set = new Set()));
-    set.add(src);
-  }
+  const refSources = buildRefSources();
   for (const n of nodes) {
     if (n.type !== 'icon') continue;
     const sources = refSources.get((n.data as IconNodeData).iconRef);

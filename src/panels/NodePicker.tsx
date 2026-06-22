@@ -6,9 +6,10 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslation } from 'react-i18next';
+import type { TFunction } from 'i18next';
 import { Icon } from '@iconify/react';
-import { searchIcons, getIcon, getProviders, type IconEntry } from '../icons/catalog';
-import type { IconSource } from '../icons/catalog';
+import { searchIcons, getIcon, getProviders, type IconEntry, type IconSource } from '../icons/catalog';
 import { IconGlyph } from '../icons/IconGlyph';
 import * as registries from '../plugins/registries';
 import { useRegistryVersion } from '../plugins/useRegistry';
@@ -80,47 +81,27 @@ function resolve(id: string, defs: ComponentDef[]): PickItem | null {
   return null;
 }
 
-function buildSections(
-  query: string,
-  recents: string[],
-  defs: ComponentDef[],
-  expanded: string | null,
-): Section[] {
-  const q = query.trim();
-
-  if (q) {
-    const ql = q.toLowerCase();
-    const items: PickItem[] = [];
-    for (const t of BUILTIN_TEMPLATES) {
-      if (t.label.toLowerCase().includes(ql) || t.id.includes(ql)) items.push(builtinItem(t));
-    }
-    for (const d of defs) {
-      if (d.name.toLowerCase().includes(ql)) items.push(componentItem(d));
-    }
-    for (const e of searchIcons(q)) items.push(iconItem(e));
-    return [{ key: 'results', title: 'Résultats', items }];
+function searchSections(query: string, defs: ComponentDef[], t: TFunction): Section[] {
+  const ql = query.toLowerCase();
+  const items: PickItem[] = [];
+  for (const tpl of BUILTIN_TEMPLATES) {
+    if (tpl.label.toLowerCase().includes(ql) || tpl.id.includes(ql)) items.push(builtinItem(tpl));
   }
+  for (const d of defs) {
+    if (d.name.toLowerCase().includes(ql)) items.push(componentItem(d));
+  }
+  for (const e of searchIcons(query)) items.push(iconItem(e));
+  return [{ key: 'results', title: t('picker.section.results'), items }];
+}
 
-  const sections: Section[] = [];
-
-  const rec = recents
-    .map((id) => resolve(id, defs))
-    .filter((x): x is PickItem => x !== null);
-  if (rec.length) sections.push({ key: 'recents', title: 'Récents', items: rec });
-
-  sections.push({ key: 'builtins', title: 'Éléments', items: BUILTIN_TEMPLATES.map(builtinItem) });
-
-  // Saved components right after the built-ins so they're easy to find (not
-  // buried under every icon provider).
-  if (defs.length)
-    sections.push({ key: 'components', title: 'Composants', items: defs.map(componentItem) });
-
+function providerSections(expanded: string | null): Section[] {
   const byProvider = new Map<string, IconEntry[]>();
   for (const e of searchIcons('', 'all')) {
     const arr = byProvider.get(e.provider);
     if (arr) arr.push(e);
     else byProvider.set(e.provider, [e]);
   }
+  const sections: Section[] = [];
   for (const prov of getProviders()) {
     if (prov === 'all') continue;
     const entries = byProvider.get(prov);
@@ -136,11 +117,41 @@ function buildSections(
       expandable: entries.length > PROVIDER_CAP && !isExp,
     });
   }
+  return sections;
+}
+
+function buildSections(
+  query: string,
+  recents: string[],
+  defs: ComponentDef[],
+  expanded: string | null,
+  t: TFunction,
+): Section[] {
+  const q = query.trim();
+
+  if (q) return searchSections(q, defs, t);
+
+  const sections: Section[] = [];
+
+  const rec = recents
+    .map((id) => resolve(id, defs))
+    .filter((x): x is PickItem => x !== null);
+  if (rec.length) sections.push({ key: 'recents', title: t('picker.section.recents'), items: rec });
+
+  sections.push({ key: 'builtins', title: t('picker.section.elements'), items: BUILTIN_TEMPLATES.map(builtinItem) });
+
+  // Saved components right after the built-ins so they're easy to find (not
+  // buried under every icon provider).
+  if (defs.length)
+    sections.push({ key: 'components', title: t('picker.section.components'), items: defs.map(componentItem) });
+
+  sections.push(...providerSections(expanded));
 
   return sections;
 }
 
 function PickerInner({ picker }: { picker: PickerAnchor }) {
+  const { t } = useTranslation();
   const closePicker = useUiStore((s) => s.closePicker);
   const pushRecent = useUiStore((s) => s.pushRecent);
   const recents = useUiStore((s) => s.recents);
@@ -158,8 +169,8 @@ function PickerInner({ picker }: { picker: PickerAnchor }) {
   const inputRef = useRef<HTMLInputElement>(null);
 
   const sections = useMemo(
-    () => buildSections(query, recents, defs, expanded),
-    [query, recents, defs, expanded, blocksVersion],
+    () => buildSections(query, recents, defs, expanded, t),
+    [query, recents, defs, expanded, blocksVersion, t],
   );
   const flat = useMemo(() => sections.flatMap((s) => s.items), [sections]);
   const offsets = useMemo(() => {
@@ -237,7 +248,7 @@ function PickerInner({ picker }: { picker: PickerAnchor }) {
       className="npk"
       style={{ left: pos.left, top: pos.top }}
       role="dialog"
-      aria-label="Ajouter un nœud"
+      aria-label={t('picker.title')}
       onKeyDown={onKeyDown}
     >
       <div className="npk-search">
@@ -246,7 +257,7 @@ function PickerInner({ picker }: { picker: PickerAnchor }) {
           ref={inputRef}
           className="npk-search-input"
           type="text"
-          placeholder="Rechercher un nœud…"
+          placeholder={t('picker.searchPlaceholder')}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -254,7 +265,7 @@ function PickerInner({ picker }: { picker: PickerAnchor }) {
           <button
             type="button"
             className="npk-search-clear"
-            aria-label="Effacer"
+            aria-label={t('picker.clear')}
             onClick={() => {
               setQuery('');
               inputRef.current?.focus();
@@ -267,7 +278,7 @@ function PickerInner({ picker }: { picker: PickerAnchor }) {
 
       <div className="npk-body scroll">
         {flat.length === 0 ? (
-          <div className="npk-empty muted">Aucun résultat.</div>
+          <div className="npk-empty muted">{t('picker.noResults')}</div>
         ) : (
           sections.map((sec, si) => (
             <div className="npk-sec" key={sec.key}>
@@ -279,7 +290,7 @@ function PickerInner({ picker }: { picker: PickerAnchor }) {
                     className="npk-showall"
                     onClick={() => setExpanded(sec.provider!)}
                   >
-                    Afficher tout ({sec.total})
+                    {t('picker.showAll', { count: sec.total })}
                   </button>
                 )}
               </div>
@@ -314,9 +325,9 @@ function PickerInner({ picker }: { picker: PickerAnchor }) {
       </div>
 
       <div className="npk-hint">
-        <span>↑↓ naviguer</span>
-        <span>⏎ insérer</span>
-        <span>esc fermer</span>
+        <span>{t('picker.hint.navigate')}</span>
+        <span>{t('picker.hint.insert')}</span>
+        <span>{t('picker.hint.dismiss')}</span>
       </div>
     </div>,
     document.body,

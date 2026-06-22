@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 
 /** Curated set of lucide icons relevant to grouping cloud/architecture blocks. */
@@ -35,7 +36,8 @@ type Props = {
 };
 
 /** Dropdown to set (or clear) a group's header icon. */
-export function GroupIconPicker({ value, onPick }: Props) {
+export function GroupIconPicker({ value, onPick }: Readonly<Props>) {
+  const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -54,8 +56,8 @@ export function GroupIconPicker({ value, onPick }: Props) {
       <button
         type="button"
         className="btn-icon gip-trigger"
-        title="Icône du groupe"
-        aria-label="Icône du groupe"
+        title={t('picker.groupIcon')}
+        aria-label={t('picker.groupIcon')}
         aria-haspopup="menu"
         aria-expanded={open}
         data-active={open}
@@ -71,8 +73,8 @@ export function GroupIconPicker({ value, onPick }: Props) {
             type="button"
             className="gip-cell gip-none"
             data-active={!value}
-            title="Aucune"
-            aria-label="Aucune icône"
+            title={t('picker.groupIcon.none')}
+            aria-label={t('picker.groupIcon.noneLabel')}
             onClick={() => {
               onPick(undefined);
               setOpen(false);

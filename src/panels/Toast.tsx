@@ -9,8 +9,8 @@ export function Toast() {
 
   useEffect(() => {
     if (!message) return;
-    const id = window.setTimeout(clearToast, 3600);
-    return () => window.clearTimeout(id);
+    const id = globalThis.setTimeout(clearToast, 3600);
+    return () => globalThis.clearTimeout(id);
   }, [message, clearToast]);
 
   if (!message) return null;

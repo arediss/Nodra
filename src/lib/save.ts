@@ -4,7 +4,7 @@
 // to a blob download.
 
 const isTauri = (): boolean =>
-  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  typeof globalThis !== 'undefined' && '__TAURI_INTERNALS__' in globalThis;
 
 export type SaveFilter = { name: string; extensions: string[] };
 export type SaveResult = { saved: boolean; path?: string };
@@ -33,7 +33,7 @@ export async function saveBytes(
   a.download = suggestedName;
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
+  a.remove();
   URL.revokeObjectURL(url);
   return { saved: true };
 }

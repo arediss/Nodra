@@ -9,7 +9,6 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --port 5173 --strictPort",
     "typecheck": "tsc --noEmit",
-    "build:icons": "node scripts/build-icons.mjs",
     "build:plugin": "node scripts/build-plugin.mjs",
     "plugins:install": "node scripts/dev-install.mjs",
     "tauri": "tauri"
@@ -18,11 +17,15 @@
     "@dagrejs/dagre": "^1.1.4",
     "@iconify/react": "^5.0.2",
     "@tauri-apps/plugin-dialog": "^2.7.1",
+    "@tauri-apps/plugin-process": "^2.3.1",
+    "@tauri-apps/plugin-updater": "^2.10.1",
     "@xyflow/react": "^12.3.6",
     "html-to-image": "^1.11.13",
+    "i18next": "^26.3.1",
     "nanoid": "^5.0.9",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "react-i18next": "^17.0.8",
     "yjs": "^13.6.31",
     "zustand": "^4.5.5"
   },

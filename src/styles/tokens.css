@@ -73,6 +73,9 @@
 /* Applied via <html data-theme="dark"> (see src/lib/theme.ts). Only the
    surface/text/line colours flip; radii, type, motion stay shared. */
 :root[data-theme='dark'] {
+  /* Let the OS/browser paint dark form controls, scrollbars, etc. */
+  color-scheme: dark;
+
   --bg-window: #1c1c1e;
   --bg-sidebar: #161618;
   --bg-titlebar: #1c1c1e;
@@ -113,11 +116,6 @@
     0 4px 12px rgba(0, 0, 0, 0.35);
   --shadow-btn: 0 1px 1.5px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.06);
   --shadow-seg: 0 1px 2px rgba(0, 0, 0, 0.5), 0 0 0 0.5px rgba(0, 0, 0, 0.3);
-}
-
-/* Let the OS/browser paint dark form controls, scrollbars, etc. */
-:root[data-theme='dark'] {
-  color-scheme: dark;
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -7,39 +7,43 @@ import { DevPanel } from './DevPanel';
 import { isDesktop } from '../plugins/manage';
 import type { DiagramFile } from '../types';
 import sampleDiagram from '../data/sample-diagram.json';
+import { useTranslation, Trans } from 'react-i18next';
+import { setLang } from '../i18n';
+import type { Lang } from '../lib/lang';
 import './SettingsSheet.css';
 
 const MCP_CMD = 'claude mcp add nodra --transport http http://localhost:8080/mcp';
 
-const SHORTCUTS: { keys: string[]; label: string }[] = [
-  { keys: ['⌘', 'S'], label: 'Sauvegarder dans un fichier' },
-  { keys: ['⌘', 'O'], label: 'Ouvrir un fichier' },
-  { keys: ['⌘', 'F'], label: 'Rechercher dans le diagramme' },
-  { keys: ['V'], label: 'Outil Sélection' },
-  { keys: ['L'], label: 'Outil Lien' },
-  { keys: ['N'], label: 'Note' },
-  { keys: ['C'], label: 'Commentaire' },
-  { keys: ['G'], label: 'Groupe / cadre' },
-  { keys: ['T'], label: 'Table' },
-  { keys: ['X'], label: 'Texte' },
-  { keys: ['I'], label: 'Image' },
-  { keys: ['⌫'], label: 'Supprimer la sélection' },
+// Shortcut labels are translated at render time (labelKey -> t(labelKey)).
+const SHORTCUTS: { keys: string[]; labelKey: string }[] = [
+  { keys: ['⌘', 'S'], labelKey: 'shortcut.saveFile' },
+  { keys: ['⌘', 'O'], labelKey: 'shortcut.openFile' },
+  { keys: ['⌘', 'F'], labelKey: 'shortcut.search' },
+  { keys: ['V'], labelKey: 'shortcut.selectTool' },
+  { keys: ['L'], labelKey: 'shortcut.linkTool' },
+  { keys: ['N'], labelKey: 'shortcut.note' },
+  { keys: ['C'], labelKey: 'shortcut.comment' },
+  { keys: ['G'], labelKey: 'shortcut.group' },
+  { keys: ['T'], labelKey: 'shortcut.table' },
+  { keys: ['X'], labelKey: 'shortcut.text' },
+  { keys: ['I'], labelKey: 'shortcut.image' },
+  { keys: ['⌫'], labelKey: 'shortcut.deleteSelection' },
 ];
 
 type TabId = 'general' | 'plugins' | 'dev' | 'ai' | 'about';
 
 // The Développeur tab is desktop-only (it needs the filesystem + Tauri dialog), so
-// it's filtered out of the rendered tabs on web.
-const ALL_TABS: { id: TabId; label: string; icon: string; desktopOnly?: boolean }[] = [
-  { id: 'general', label: 'Généraux', icon: 'mdi:tune-variant' },
-  { id: 'plugins', label: 'Plugins', icon: 'mdi:puzzle-outline' },
-  { id: 'dev', label: 'Développeur', icon: 'mdi:code-braces', desktopOnly: true },
-  { id: 'ai', label: 'MCP / IA', icon: 'mdi:robot-happy-outline' },
-  { id: 'about', label: 'À propos', icon: 'mdi:information-outline' },
+// it's filtered out of the rendered tabs on web. Labels are translated at render time.
+const ALL_TABS: { id: TabId; labelKey: string; icon: string; desktopOnly?: boolean }[] = [
+  { id: 'general', labelKey: 'settings.tabGeneral', icon: 'mdi:tune-variant' },
+  { id: 'plugins', labelKey: 'settings.tabPlugins', icon: 'mdi:puzzle-outline' },
+  { id: 'dev', labelKey: 'settings.tabDev', icon: 'mdi:code-braces', desktopOnly: true },
+  { id: 'ai', labelKey: 'settings.tabAi', icon: 'mdi:robot-happy-outline' },
+  { id: 'about', labelKey: 'settings.tabAbout', icon: 'mdi:information-outline' },
 ];
 const TABS = ALL_TABS.filter((t) => !t.desktopOnly || isDesktop);
 
-function ToggleRow({ prefKey, label, sub }: { prefKey: keyof Prefs; label: string; sub: string }) {
+function ToggleRow({ prefKey, label, sub }: Readonly<{ prefKey: keyof Prefs; label: string; sub: string }>) {
   const on = useUiStore((s) => s.prefs[prefKey]);
   const setPref = useUiStore((s) => s.setPref);
   return (
@@ -55,22 +59,23 @@ function ToggleRow({ prefKey, label, sub }: { prefKey: keyof Prefs; label: strin
   );
 }
 
-const THEME_OPTS: { id: 'light' | 'dark' | 'system'; label: string; icon: string }[] = [
-  { id: 'light', label: 'Clair', icon: 'mdi:white-balance-sunny' },
-  { id: 'dark', label: 'Sombre', icon: 'mdi:weather-night' },
-  { id: 'system', label: 'Auto', icon: 'mdi:laptop' },
+const THEME_OPTS: { id: 'light' | 'dark' | 'system'; icon: string }[] = [
+  { id: 'light', icon: 'mdi:white-balance-sunny' },
+  { id: 'dark', icon: 'mdi:weather-night' },
+  { id: 'system', icon: 'mdi:laptop' },
 ];
 
 function ThemeRow() {
+  const { t } = useTranslation();
   const theme = useUiStore((s) => s.theme);
   const setTheme = useUiStore((s) => s.setTheme);
   return (
     <div className="switch-row">
       <span className="switch-label">
-        Thème
-        <span className="switch-sub">Clair, sombre, ou suivre le système</span>
+        {t('settings.theme')}
+        <span className="switch-sub">{t('settings.themeSub')}</span>
       </span>
-      <div className="seg" role="group" aria-label="Thème">
+      <div className="seg" role="group" aria-label={t('settings.theme')}>
         {THEME_OPTS.map((o) => (
           <button
             key={o.id}
@@ -80,7 +85,7 @@ function ThemeRow() {
             onClick={() => setTheme(o.id)}
           >
             <Icon icon={o.icon} width={15} height={15} />
-            {o.label}
+            {t(`theme.${o.id}`)}
           </button>
         ))}
       </div>
@@ -88,7 +93,38 @@ function ThemeRow() {
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+// Language names are shown in their own language (not translated).
+const LANG_OPTS: { id: Lang; label: string }[] = [
+  { id: 'fr', label: 'Français' },
+  { id: 'en', label: 'English' },
+];
+
+function LangRow() {
+  const { t, i18n } = useTranslation();
+  const cur: Lang = i18n.language?.startsWith('en') ? 'en' : 'fr';
+  return (
+    <div className="switch-row">
+      <span className="switch-label">
+        {t('settings.language')}
+        <span className="switch-sub">{t('settings.languageSub')}</span>
+      </span>
+      <select
+        className="set-select"
+        value={cur}
+        onChange={(e) => setLang(e.target.value as Lang)}
+        aria-label={t('settings.language')}
+      >
+        {LANG_OPTS.map((o) => (
+          <option key={o.id} value={o.id}>
+            {o.label}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+function Card({ title, children }: Readonly<{ title: string; children: React.ReactNode }>) {
   return (
     <section className="set-card">
       <div className="set-card-title">{title}</div>
@@ -103,6 +139,8 @@ export function SettingsSheet() {
   const close = useUiStore((s) => s.closeSettings);
   const setSettingsTab = useUiStore((s) => s.setSettingsTab);
   const loadDiagram = useFlowStore((s) => s.loadDiagram);
+  // `tr` aliased so it doesn't shadow the `t` (tab) param in the TABS maps below.
+  const { t: tr } = useTranslation();
   // The store is the single source of truth for the active tab (set by
   // openSettings(tab) and the nav below), so external routing never races.
   const tab: TabId = TABS.some((t) => t.id === requestedTab)
@@ -112,8 +150,8 @@ export function SettingsSheet() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    globalThis.addEventListener('keydown', onKey);
+    return () => globalThis.removeEventListener('keydown', onKey);
   }, [open, close]);
 
   if (!open) return null;
@@ -126,10 +164,10 @@ export function SettingsSheet() {
         className="sheet set-sheet"
         onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
-        aria-label="Réglages"
+        aria-label={tr('settings.title')}
       >
         <aside className="set-nav">
-          <div className="set-nav-title">Réglages</div>
+          <div className="set-nav-title">{tr('settings.title')}</div>
           {TABS.map((t) => (
             <button
               key={t.id}
@@ -139,15 +177,15 @@ export function SettingsSheet() {
               onClick={() => setSettingsTab(t.id)}
             >
               <Icon icon={t.icon} width={16} height={16} />
-              {t.label}
+              {tr(t.labelKey)}
             </button>
           ))}
         </aside>
 
         <div className="set-main">
           <div className="set-main-head">
-            <h2 className="set-main-title">{current.label}</h2>
-            <button className="sheet-close" onClick={close} aria-label="Fermer">
+            <h2 className="set-main-title">{tr(current.labelKey)}</h2>
+            <button className="sheet-close" onClick={close} aria-label={tr('common.close')}>
               <Icon icon="mdi:close" width={16} height={16} />
             </button>
           </div>
@@ -155,31 +193,32 @@ export function SettingsSheet() {
           <div className="set-main-body">
             {tab === 'general' && (
               <>
-                <Card title="Apparence">
+                <Card title={tr('settings.appearance')}>
                   <ThemeRow />
+                  <LangRow />
                 </Card>
-                <Card title="Édition">
+                <Card title={tr('settings.editingTitle')}>
                   <ToggleRow
                     prefKey="snapToGrid"
-                    label="Aligner sur la grille"
-                    sub="Aimante les nœuds sur une grille de 8 px"
+                    label={tr('settings.snapToGrid')}
+                    sub={tr('settings.snapToGridSub')}
                   />
                   <ToggleRow
                     prefKey="autoSnapshot"
-                    label="Instantanés automatiques"
-                    sub="Capture une version dans l'historique après chaque pause"
+                    label={tr('settings.autoSnapshot')}
+                    sub={tr('settings.autoSnapshotSub')}
                   />
                   <ToggleRow
                     prefKey="showMinimap"
-                    label="Mini-carte"
-                    sub="Affiche la mini-carte en bas à droite"
+                    label={tr('settings.minimap')}
+                    sub={tr('settings.minimapSub')}
                   />
                 </Card>
-                <Card title="Raccourcis clavier">
+                <Card title={tr('settings.shortcutsTitle')}>
                   <div className="set-kbds">
                     {SHORTCUTS.map((s) => (
-                      <div className="set-kbd-row" key={s.label}>
-                        <span className="set-kbd-label">{s.label}</span>
+                      <div className="set-kbd-row" key={s.labelKey}>
+                        <span className="set-kbd-label">{tr(s.labelKey)}</span>
                         <span className="set-kbd-keys">
                           {s.keys.map((k) => (
                             <kbd key={k}>{k}</kbd>
@@ -189,7 +228,7 @@ export function SettingsSheet() {
                     ))}
                   </div>
                 </Card>
-                <Card title="Démarrer">
+                <Card title={tr('settings.startTitle')}>
                   <button
                     type="button"
                     className="btn set-example"
@@ -199,10 +238,10 @@ export function SettingsSheet() {
                     }}
                   >
                     <Icon icon="mdi:lightbulb-on-outline" width={15} height={15} />
-                    Charger un exemple
+                    {tr('settings.loadExample')}
                   </button>
                   <p className="muted set-explainer">
-                    Installe des plugins depuis Réglages → Plugins pour enrichir les blocs.
+                    {tr('settings.startExplainer')}
                   </p>
                 </Card>
               </>
@@ -214,50 +253,43 @@ export function SettingsSheet() {
 
             {tab === 'ai' && (
               <>
-                <Card title="Connecter Claude Code (MCP)">
+                <Card title={tr('mcp.connectTitle')}>
                   <p className="set-p">
-                    Branche <strong>Claude Code</strong> à Nodra via MCP : décris ton archi
-                    en langage naturel et il la dessine — créer des nœuds, relier, grouper —
-                    <strong> sans clé API</strong>, via ton abonnement Claude.
+                    <Trans i18nKey="mcp.connectBody" components={{ s: <strong /> }} />
                   </p>
                   <div className="set-code">
                     <code>{MCP_CMD}</code>
                     <button
                       type="button"
                       className="btn-icon"
-                      title="Copier"
-                      aria-label="Copier la commande"
+                      title={tr('common.copy')}
+                      aria-label={tr('mcp.copyCommand')}
                       onClick={() => {
                         navigator.clipboard?.writeText(MCP_CMD);
-                        useUiStore.getState().showToast('Commande copiée');
+                        useUiStore.getState().showToast(tr('mcp.commandCopied'));
                       }}
                     >
                       <Icon icon="mdi:content-copy" width={15} height={15} />
                     </button>
                   </div>
                   <p className="muted set-explainer">
-                    Lance cette commande dans le dossier de ton projet, puis demande à Claude
-                    Code : « ajoute un Lambda relié à une DynamoDB dans un groupe VPC ».
+                    {tr('mcp.connectExplainer')}
                   </p>
                 </Card>
-                <Card title="Statut">
+                <Card title={tr('mcp.statusTitle')}>
                   <p className="muted set-p">
-                    Le serveur MCP de Nodra est en cours de construction. Cette page te
-                    donnera la commande exacte + le port dès qu'il sera disponible — aucune clé
-                    API ne sera jamais requise.
+                    {tr('mcp.statusBody')}
                   </p>
                 </Card>
               </>
             )}
 
             {tab === 'about' && (
-              <Card title="À propos">
+              <Card title={tr('about.title')}>
                 <div className="set-about-name">Nodra</div>
-                <div className="set-about-version muted">version 0.1.0</div>
+                <div className="set-about-version muted">{tr('about.version', { version: '0.1.0' })}</div>
                 <p className="muted set-about-tagline">
-                  Éditeur de diagrammes cloud, self-hosted — alternative libre à Lucidchart.
-                  Icônes et exports extensibles via plugins ; mode bureau (Tauri) et web
-                  (<code>-serve</code>).
+                  <Trans i18nKey="about.tagline" components={{ c: <code /> }} />
                 </p>
                 <div className="set-about-stack">
                   <span>Tauri</span>

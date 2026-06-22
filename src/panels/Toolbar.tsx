@@ -1,4 +1,5 @@
 import { Icon } from '@iconify/react';
+import { useTranslation } from 'react-i18next';
 import { useUiStore } from '../ui-store';
 import { useCollabStore } from '../collab/session';
 import { usePresenceStore } from '../collab/presence';
@@ -9,6 +10,7 @@ import { DocTabs } from './DocTabs';
 import './Toolbar.css';
 
 export function Toolbar() {
+  const { t } = useTranslation();
   const openShare = useUiStore((s) => s.openShare);
   const inSession = useCollabStore((s) => s.role !== null);
   const connected = useCollabStore((s) => s.status === 'connected');
@@ -32,8 +34,8 @@ export function Toolbar() {
           className="tb-share"
           data-on={inSession ? 'true' : undefined}
           onClick={openShare}
-          title="Partager"
-          aria-label="Partager"
+          title={t('toolbar.share')}
+          aria-label={t('toolbar.share')}
         >
           <Icon icon="mdi:account-multiple-plus-outline" width={18} height={18} />
           {inSession && (

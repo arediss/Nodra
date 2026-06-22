@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { NodeResizer, type NodeProps } from '@xyflow/react';
 import type { NoteNodeType, NoteColor } from '../../types';
 import { useFlowStore } from '../../store';
@@ -14,6 +15,7 @@ const PALETTE: Record<NoteColor, { bg: string; border: string }> = {
 };
 
 export function NoteNode({ id, data, selected }: NodeProps<NoteNodeType>) {
+  const { t } = useTranslation();
   const palette = PALETTE[data.color ?? 'yellow'];
 
   const onChange = useCallback(
@@ -40,7 +42,7 @@ export function NoteNode({ id, data, selected }: NodeProps<NoteNodeType>) {
           className="note-node-text nodrag nowheel"
           value={data.text}
           onChange={onChange}
-          placeholder="Note…"
+          placeholder={t('node.note.placeholder')}
           spellCheck={false}
         />
       </div>

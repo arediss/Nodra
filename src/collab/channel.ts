@@ -30,8 +30,9 @@ export function openChannel(opts: {
   const c = createCollabDoc();
   const gate = () => ({ viewing: opts.isActive(), canEdit: opts.canEdit() });
   const bridge = startBridge(c, { seed: opts.isOwner, gate });
+  const room = encodeURIComponent(`${opts.token}~${opts.docId}`);
   const provider = createProvider({
-    url: `${opts.wsBase}/sync?room=${encodeURIComponent(`${opts.token}~${opts.docId}`)}`,
+    url: `${opts.wsBase}/sync?room=${room}`,
     doc: c.doc,
     isHost: opts.isOwner,
     onStatus: () => {},

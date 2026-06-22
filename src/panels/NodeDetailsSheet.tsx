@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useFlowStore } from '../store';
 import { useUiStore } from '../ui-store';
@@ -11,6 +12,7 @@ import './NodeDetailsSheet.css';
  * persistent right panel, so this opens on demand from the selection balloon.
  */
 export function NodeDetailsSheet() {
+  const { t } = useTranslation();
   const open = useUiStore((s) => s.detailsOpen);
   const close = useUiStore((s) => s.closeDetails);
   const showToast = useUiStore((s) => s.showToast);
@@ -44,7 +46,7 @@ export function NodeDetailsSheet() {
     const k = kDraft.trim();
     if (!k) return;
     if (Object.prototype.hasOwnProperty.call(metadata, k)) {
-      showToast(`La clé « ${k} » existe déjà`);
+      showToast(t('node.details.keyExists', { key: k }));
       return;
     }
     updateNodeData(id, { metadata: { ...metadata, [k]: vDraft } });
@@ -67,12 +69,12 @@ export function NodeDetailsSheet() {
         className="sheet sheet-sm"
         onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
-        aria-label="Détails du nœud"
+        aria-label={t('node.details.sheetTitle')}
       >
         <div className="sheet-header">
           <Icon icon="mdi:tag-multiple-outline" width={18} height={18} />
-          <h2 className="sheet-title">{node.data.label || 'Nœud'}</h2>
-          <button type="button" className="sheet-close" onClick={close} aria-label="Fermer">
+          <h2 className="sheet-title">{node.data.label || t('node.defaultLabel')}</h2>
+          <button type="button" className="sheet-close" onClick={close} aria-label={t('common.close')}>
             <Icon icon="mdi:close" width={16} height={16} />
           </button>
         </div>
@@ -80,32 +82,32 @@ export function NodeDetailsSheet() {
         <div className="sheet-body">
           {readOnly && (
             <p className="nds-readonly">
-              <Icon icon="mdi:lock-outline" width={14} height={14} /> Document en lecture
-              seule — modifications désactivées.
+              <Icon icon="mdi:lock-outline" width={14} height={14} /> {t('node.details.readOnly')}
             </p>
           )}
           {tfAddr && (
             <div className="nds-field">
-              <label className="shr-label">Adresse IaC</label>
+              <span className="shr-label">{t('node.details.iacAddress')}</span>
               <code className="nds-addr">{tfAddr}</code>
             </div>
           )}
 
           <div className="nds-field">
-            <label className="shr-label">Tags</label>
+            <label className="shr-label" htmlFor="nds-tag-input">{t('node.details.tags')}</label>
             <div className="nds-tags">
-              {tags.map((t) => (
-                <span key={t} className="nds-tag">
-                  {t}
-                  <button type="button" aria-label={`Retirer ${t}`} onClick={() => removeTag(t)}>
+              {tags.map((tag) => (
+                <span key={tag} className="nds-tag">
+                  {tag}
+                  <button type="button" aria-label={t('node.details.removeTag', { tag })} onClick={() => removeTag(tag)}>
                     <Icon icon="mdi:close" width={12} height={12} />
                   </button>
                 </span>
               ))}
             </div>
             <input
+              id="nds-tag-input"
               className="input"
-              placeholder="Ajouter un tag puis Entrée (ex. production, critique)"
+              placeholder={t('node.details.tagPlaceholder')}
               value={tagDraft}
               disabled={readOnly}
               onChange={(e) => setTagDraft(e.target.value)}
@@ -119,7 +121,7 @@ export function NodeDetailsSheet() {
           </div>
 
           <div className="nds-field">
-            <label className="shr-label">Métadonnées</label>
+            <label className="shr-label" htmlFor="nds-meta-key-input">{t('node.details.metadata')}</label>
             {metaEntries.map(([k, v]) => (
               <div className="nds-meta-row" key={k}>
                 <span className="nds-meta-key">{k}</span>
@@ -131,7 +133,7 @@ export function NodeDetailsSheet() {
                 <button
                   type="button"
                   className="btn-icon btn-danger"
-                  aria-label={`Retirer ${k}`}
+                  aria-label={t('node.details.removeMeta', { key: k })}
                   onClick={() => removeMeta(k)}
                 >
                   <Icon icon="mdi:close" width={15} height={15} />
@@ -140,15 +142,16 @@ export function NodeDetailsSheet() {
             ))}
             <div className="nds-meta-add">
               <input
+                id="nds-meta-key-input"
                 className="input"
-                placeholder="clé"
+                placeholder={t('node.details.metaKeyPlaceholder')}
                 value={kDraft}
                 disabled={readOnly}
                 onChange={(e) => setKDraft(e.target.value)}
               />
               <input
                 className="input"
-                placeholder="valeur"
+                placeholder={t('node.details.metaValuePlaceholder')}
                 value={vDraft}
                 disabled={readOnly}
                 onChange={(e) => setVDraft(e.target.value)}
@@ -160,7 +163,7 @@ export function NodeDetailsSheet() {
                 }}
               />
               <button type="button" className="btn" onClick={addMeta} disabled={readOnly}>
-                Ajouter
+                {t('common.add')}
               </button>
             </div>
           </div>

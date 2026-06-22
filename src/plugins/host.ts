@@ -5,6 +5,7 @@ import { searchIcons, getCatalog } from '../icons/catalog';
 import { flowBridge } from './flowBridge';
 import { useUiStore } from '../ui-store';
 import { newId } from '../store';
+import { i18n } from '../i18n';
 
 /**
  * Build the capability-gated SDK handed to a plugin's `register(host)`.
@@ -127,6 +128,13 @@ export function buildHost(manifest: PluginManifest, dev?: DevSource): Host {
       showToast: (m) => useUiStore.getState().showToast(m),
     },
     utils: { newId },
+    // Localization over the shared i18next instance — ungated (like ui/utils).
+    i18n: {
+      addBundle: (lng, ns, resources) =>
+        i18n.addResourceBundle(lng, ns, resources, true, true),
+      language: () => i18n.language,
+      t: (key, vars) => i18n.t(key, vars ?? {}),
+    },
     // Resolve a plugin-relative asset path to a fetchable URL. Strip any traversal
     // from the relative path first (defense in depth; the Rust readers re-check).
     assetUrl: (rel) => {

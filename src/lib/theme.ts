@@ -22,14 +22,16 @@ export function saveTheme(mode: ThemeMode): void {
 
 const prefersDark = (): boolean => {
   try {
-    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return globalThis.matchMedia('(prefers-color-scheme: dark)').matches;
   } catch {
     return false;
   }
 };
 
-const resolve = (mode: ThemeMode): 'light' | 'dark' =>
-  mode === 'system' ? (prefersDark() ? 'dark' : 'light') : mode;
+const resolve = (mode: ThemeMode): 'light' | 'dark' => {
+  if (mode !== 'system') return mode;
+  return prefersDark() ? 'dark' : 'light';
+};
 
 /** Set the resolved theme on <html data-theme>. CSS variables key off this. */
 export function applyTheme(mode: ThemeMode): void {
@@ -40,7 +42,7 @@ export function applyTheme(mode: ThemeMode): void {
 export function watchSystemTheme(getMode: () => ThemeMode): () => void {
   let mq: MediaQueryList;
   try {
-    mq = window.matchMedia('(prefers-color-scheme: dark)');
+    mq = globalThis.matchMedia('(prefers-color-scheme: dark)');
   } catch {
     return () => {};
   }

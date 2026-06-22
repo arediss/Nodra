@@ -12,11 +12,11 @@ export function Tooltip({
   label,
   side = 'right',
   children,
-}: {
+}: Readonly<{
   label: string;
   side?: Side;
   children: ReactNode;
-}) {
+}>) {
   const anchorRef = useRef<HTMLSpanElement>(null);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [pos, setPos] = useState<{ x: number; y: number } | null>(null);

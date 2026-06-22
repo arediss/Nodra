@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useReactFlow } from '@xyflow/react';
 import { useUiStore, type ToolId } from '../ui-store';
@@ -15,14 +16,6 @@ import './BottomDock.css';
 
 type ToolDef = { id: ToolId; icon: string; label: string; key: string };
 
-const PLACEMENT_TOOLS: ToolDef[] = [
-  { id: 'note', icon: 'mdi:note-outline', label: 'Note', key: 'N' },
-  { id: 'comment', icon: 'mdi:comment-outline', label: 'Commentaire', key: 'C' },
-  { id: 'group', icon: 'mdi:shape-rectangle-plus', label: 'Groupe / cadre', key: 'G' },
-  { id: 'table', icon: 'mdi:table', label: 'Table (BDD)', key: 'T' },
-  { id: 'text', icon: 'mdi:format-text', label: 'Texte', key: 'X' },
-];
-
 const isTypingTarget = (el: Element | null): boolean =>
   !!el &&
   (el.tagName === 'INPUT' ||
@@ -38,6 +31,7 @@ function viewportCenter(rf: ReturnType<typeof useReactFlow>) {
 }
 
 export function BottomDock() {
+  const { t } = useTranslation();
   const rf = useReactFlow();
   const tool = useUiStore((s) => s.tool);
   const setTool = useUiStore((s) => s.setTool);
@@ -50,6 +44,17 @@ export function BottomDock() {
   // Right-side panels (Connexions, Mermaid…) are contributed via the registry.
   const panelsVersion = useRegistryVersion(registries.panels);
   const panels = useMemo(() => registries.panels.all(), [panelsVersion]);
+
+  const placementTools = useMemo<ToolDef[]>(
+    () => [
+      { id: 'note', icon: 'mdi:note-outline', label: t('toolbar.note'), key: 'N' },
+      { id: 'comment', icon: 'mdi:comment-outline', label: t('toolbar.comment'), key: 'C' },
+      { id: 'group', icon: 'mdi:shape-rectangle-plus', label: t('toolbar.group'), key: 'G' },
+      { id: 'table', icon: 'mdi:table', label: t('toolbar.table'), key: 'T' },
+      { id: 'text', icon: 'mdi:format-text', label: t('toolbar.text'), key: 'X' },
+    ],
+    [t],
+  );
 
   // Hide the editing tools when the active doc is shared read-only by someone else.
   const sharedDocs = useCollabStore((s) => s.sharedDocs);
@@ -123,34 +128,34 @@ export function BottomDock() {
         setTool(next);
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    globalThis.addEventListener('keydown', onKey);
+    return () => globalThis.removeEventListener('keydown', onKey);
   }, [setTool, editingAllowed]);
 
   return (
-    <div className="dock" role="toolbar" aria-label="Outils">
+    <div className="dock" role="toolbar" aria-label={t('toolbar.tools')}>
       <div className="dock-scroll">
         {/* ---- creation / editing tools (hidden when locked or read-only) ---- */}
         {editingAllowed && (
           <>
-            <Tooltip label="Sélection · V" side="top">
+            <Tooltip label={t('toolbar.selectTip', { key: 'V' })} side="top">
               <button
                 type="button"
                 className="dock-btn"
                 data-active={tool === 'select'}
-                aria-label="Sélection"
+                aria-label={t('toolbar.select')}
                 aria-pressed={tool === 'select'}
                 onClick={() => setTool('select')}
               >
                 <Icon icon="mdi:cursor-default-outline" width={20} height={20} />
               </button>
             </Tooltip>
-            <Tooltip label="Lien · L" side="top">
+            <Tooltip label={t('toolbar.linkTip', { key: 'L' })} side="top">
               <button
                 type="button"
                 className="dock-btn"
                 data-active={tool === 'connect'}
-                aria-label="Lien"
+                aria-label={t('toolbar.link')}
                 aria-pressed={tool === 'connect'}
                 onClick={() => setTool(tool === 'connect' ? 'select' : 'connect')}
               >
@@ -160,37 +165,37 @@ export function BottomDock() {
 
             <span className="dock-sep" />
 
-            {PLACEMENT_TOOLS.map((t) => (
-              <Tooltip key={t.id} label={`${t.label} · ${t.key}`} side="top">
+            {placementTools.map((pt) => (
+              <Tooltip key={pt.id} label={t('toolbar.toolTip', { label: pt.label, key: pt.key })} side="top">
                 <button
                   type="button"
                   className="dock-btn"
-                  data-active={tool === t.id}
-                  aria-label={t.label}
-                  aria-pressed={tool === t.id}
-                  onClick={() => setTool(t.id)}
+                  data-active={tool === pt.id}
+                  aria-label={pt.label}
+                  aria-pressed={tool === pt.id}
+                  onClick={() => setTool(pt.id)}
                 >
-                  <Icon icon={t.icon} width={20} height={20} />
+                  <Icon icon={pt.icon} width={20} height={20} />
                 </button>
               </Tooltip>
             ))}
 
-            <Tooltip label="Image (SVG/PNG) · I" side="top">
+            <Tooltip label={t('toolbar.imageTip', { key: 'I' })} side="top">
               <button
                 type="button"
                 className="dock-btn"
-                aria-label="Image (SVG/PNG)"
+                aria-label={t('toolbar.image')}
                 onClick={() => fileRef.current?.click()}
               >
                 <Icon icon="mdi:image-outline" width={20} height={20} />
               </button>
             </Tooltip>
 
-            <Tooltip label="Ajouter un nœud" side="top">
+            <Tooltip label={t('toolbar.addNode')} side="top">
               <button
                 type="button"
                 className="dock-btn dock-btn-add"
-                aria-label="Ajouter un nœud"
+                aria-label={t('toolbar.addNode')}
                 onClick={onAdd}
               >
                 <Icon icon="mdi:plus" width={22} height={22} />

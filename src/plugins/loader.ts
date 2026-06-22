@@ -2,8 +2,10 @@ import { buildHost } from './host';
 import type { DevSource } from './host';
 import { API_VERSION } from './types';
 import type { Host, PluginManifest, PluginModule } from './types';
+import { i18n } from '../i18n';
 
-const isTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+const isTauri =
+  typeof globalThis.window !== 'undefined' && '__TAURI_INTERNALS__' in globalThis;
 
 const majorOf = (v: string): string => (v || '').split('.')[0] || '';
 
@@ -40,7 +42,7 @@ export async function loadPluginFromSource(
   try {
     const mod = (await import(/* @vite-ignore */ url)) as PluginModule;
     if (typeof mod.register !== 'function') {
-      throw new Error('plugin has no register(host) export');
+      throw new TypeError('plugin has no register(host) export');
     }
     // Drop a prior load of the same id first, so reloads don't leak.
     loaded.get(manifest.id)?.dispose();
@@ -277,6 +279,44 @@ let watchSeeded = false;
 // Guard against overlapping ticks: skip a tick while a reload is still in flight.
 let watchBusy = false;
 
+/** Apply one fingerprint: record its sig and reload the plugin if it changed. */
+async function applyDevFingerprint(
+  id: string,
+  sig: string,
+  disabled: Set<string>,
+): Promise<void> {
+  const prev = lastSig.get(id);
+  lastSig.set(id, sig);
+  if (!watchSeeded) return; // first observation: seed only, never reload
+  if (disabled.has(id)) return; // disabled plugins aren't hot-reloaded
+  if (prev === undefined) {
+    // A newly-appeared enabled plugin -> load it.
+    await reloadDevPlugin(id);
+    console.log(`[plugins] dev plugin ${id} apparu — chargé`);
+    showToastSafe(i18n.t('loader.pluginLoaded', { id }));
+  } else if (prev !== sig) {
+    // Built code changed -> reload just this one.
+    await reloadDevPlugin(id);
+    console.log(`[plugins] dev plugin ${id} rechargé (changement détecté)`);
+    showToastSafe(i18n.t('loader.pluginReloaded', { id }));
+  }
+}
+
+/** Unload any tracked dev plugin no longer present and forget stale signatures. */
+function pruneVanishedDevPlugins(seen: Set<string>): void {
+  // A loaded dev plugin that vanished from the list -> unload it.
+  for (const id of [...devLoaded]) {
+    if (!seen.has(id)) {
+      unloadPlugin(id);
+      devLoaded.delete(id);
+      lastSig.delete(id);
+      console.log(`[plugins] dev plugin ${id} disparu — déchargé`);
+    }
+  }
+  // Drop signatures for ids no longer present so a re-add re-seeds cleanly.
+  for (const id of [...lastSig.keys()]) if (!seen.has(id)) lastSig.delete(id);
+}
+
 async function watchTick(): Promise<void> {
   if (watchBusy) return; // a previous tick's reload is still running
   const dir = devPluginsDir();
@@ -295,34 +335,10 @@ async function watchTick(): Promise<void> {
 
     for (const { id, sig } of fps) {
       seen.add(id);
-      const prev = lastSig.get(id);
-      lastSig.set(id, sig);
-      if (!watchSeeded) continue; // first observation: seed only, never reload
-      if (disabled.has(id)) continue; // disabled plugins aren't hot-reloaded
-      if (prev === undefined) {
-        // A newly-appeared enabled plugin -> load it.
-        await reloadDevPlugin(id);
-        console.log(`[plugins] dev plugin ${id} apparu — chargé`);
-        showToastSafe(`${id} chargé`);
-      } else if (prev !== sig) {
-        // Built code changed -> reload just this one.
-        await reloadDevPlugin(id);
-        console.log(`[plugins] dev plugin ${id} rechargé (changement détecté)`);
-        showToastSafe(`${id} rechargé`);
-      }
+      await applyDevFingerprint(id, sig, disabled);
     }
 
-    // A loaded dev plugin that vanished from the list -> unload it.
-    for (const id of [...devLoaded]) {
-      if (!seen.has(id)) {
-        unloadPlugin(id);
-        devLoaded.delete(id);
-        lastSig.delete(id);
-        console.log(`[plugins] dev plugin ${id} disparu — déchargé`);
-      }
-    }
-    // Drop signatures for ids no longer present so a re-add re-seeds cleanly.
-    for (const id of [...lastSig.keys()]) if (!seen.has(id)) lastSig.delete(id);
+    pruneVanishedDevPlugins(seen);
 
     watchSeeded = true; // subsequent ticks compare against the seeded sigs
   } catch (e) {

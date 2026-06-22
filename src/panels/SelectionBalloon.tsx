@@ -1,4 +1,5 @@
 import { useLayoutEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useStore } from '@xyflow/react';
 import { useFlowStore, newId } from '../store';
@@ -29,7 +30,69 @@ const NOTE_COLORS: { id: NoteColor; hex: string }[] = [
 
 type Pos = { x: number; y: number };
 
+type EdgePathType = 'smooth' | 'bezier' | 'straight';
+
+// i18n key + icon per edge path type (avoids nested ternaries in the render).
+const EDGE_PATH_TITLE_KEY: Record<EdgePathType, string> = {
+  smooth: 'node.edge.path.angled',
+  bezier: 'node.edge.path.curved',
+  straight: 'node.edge.path.straight',
+};
+const EDGE_PATH_ICON: Record<EdgePathType, string> = {
+  smooth: 'mdi:vector-polyline',
+  bezier: 'mdi:vector-curve',
+  straight: 'mdi:vector-line',
+};
+
+const duplicateNode = (n: AppNode) => {
+  const clone = {
+    ...n,
+    id: newId(),
+    position: { x: n.position.x + 24, y: n.position.y + 24 },
+    selected: false,
+  } as AppNode;
+  useFlowStore.getState().addNode(clone);
+  useFlowStore.getState().selectNode(clone.id);
+};
+
+const removeSelection = () => useFlowStore.getState().deleteSelection();
+
+function Divider() {
+  return <span className="selb-divider" aria-hidden="true" />;
+}
+
+function DuplicateBtn({ n }: Readonly<{ n: AppNode }>) {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      className="btn-icon"
+      title={t('common.duplicate')}
+      aria-label={t('common.duplicate')}
+      onClick={() => duplicateNode(n)}
+    >
+      <Icon icon="mdi:content-copy" width={16} height={16} />
+    </button>
+  );
+}
+
+function DeleteBtn() {
+  const { t } = useTranslation();
+  return (
+    <button
+      type="button"
+      className="btn-icon btn-danger"
+      title={t('common.delete')}
+      aria-label={t('common.delete')}
+      onClick={removeSelection}
+    >
+      <Icon icon="mdi:trash-can-outline" width={16} height={16} />
+    </button>
+  );
+}
+
 export function SelectionBalloon() {
+  const { t } = useTranslation();
   const selectedNodeId = useFlowStore((s) => s.selectedNodeId);
   const selectedEdgeId = useFlowStore((s) => s.selectedEdgeId);
   const nodes = useFlowStore((s) => s.nodes);
@@ -77,45 +140,6 @@ export function SelectionBalloon() {
   const node = nodes.find((n) => n.id === selectedNodeId);
   const edge = edges.find((e) => e.id === selectedEdgeId);
 
-  const duplicate = (n: AppNode) => {
-    const clone = {
-      ...n,
-      id: newId(),
-      position: { x: n.position.x + 24, y: n.position.y + 24 },
-      selected: false,
-    } as AppNode;
-    useFlowStore.getState().addNode(clone);
-    useFlowStore.getState().selectNode(clone.id);
-  };
-
-  const remove = () => useFlowStore.getState().deleteSelection();
-
-  const Divider = () => <span className="selb-divider" aria-hidden="true" />;
-
-  const DuplicateBtn = ({ n }: { n: AppNode }) => (
-    <button
-      type="button"
-      className="btn-icon"
-      title="Dupliquer"
-      aria-label="Dupliquer"
-      onClick={() => duplicate(n)}
-    >
-      <Icon icon="mdi:content-copy" width={16} height={16} />
-    </button>
-  );
-
-  const DeleteBtn = () => (
-    <button
-      type="button"
-      className="btn-icon btn-danger"
-      title="Supprimer"
-      aria-label="Supprimer"
-      onClick={remove}
-    >
-      <Icon icon="mdi:trash-can-outline" width={16} height={16} />
-    </button>
-  );
-
   let body: React.ReactNode = null;
 
   if (node && isIconNode(node) && isImageNodeData(node.data)) {
@@ -128,8 +152,8 @@ export function SelectionBalloon() {
           type="button"
           className="btn-icon"
           data-active={framed}
-          title={framed ? 'Retirer le fond' : 'Ajouter un fond'}
-          aria-label="Fond du bloc image"
+          title={framed ? t('node.image.removeBackground') : t('node.image.addBackground')}
+          aria-label={t('node.image.background')}
           onClick={() =>
             useFlowStore.getState().updateNodeData(node.id, { imageFramed: !framed })
           }
@@ -141,8 +165,8 @@ export function SelectionBalloon() {
           type="button"
           className="btn-icon"
           data-active={imgTags > 0}
-          title="Détails (tags, métadonnées)"
-          aria-label="Détails"
+          title={t('node.details.tooltip')}
+          aria-label={t('node.details.label')}
           onClick={() => useUiStore.getState().openDetails()}
         >
           <Icon icon="mdi:tag-multiple-outline" width={16} height={16} />
@@ -156,9 +180,10 @@ export function SelectionBalloon() {
     const tagCount = node.data.tags?.length ?? 0;
     body = (
       <>
-        <label className="selb-swatch" title="Couleur d'accent">
+        <label className="selb-swatch" title={t('node.accentColor')}>
           <input
             type="color"
+            aria-label={t('node.accentColor')}
             value={accent ?? DEFAULT_ACCENT}
             onChange={(e) =>
               useFlowStore.getState().updateNodeData(node.id, {
@@ -171,8 +196,8 @@ export function SelectionBalloon() {
           <button
             type="button"
             className="btn-icon selb-reset"
-            title="Réinitialiser la couleur"
-            aria-label="Réinitialiser la couleur"
+            title={t('node.resetColor')}
+            aria-label={t('node.resetColor')}
             onClick={() =>
               useFlowStore.getState().updateNodeData(node.id, {
                 accent: undefined,
@@ -187,8 +212,8 @@ export function SelectionBalloon() {
           type="button"
           className="btn-icon"
           data-active={tagCount > 0}
-          title="Détails (tags, métadonnées)"
-          aria-label="Détails"
+          title={t('node.details.tooltip')}
+          aria-label={t('node.details.label')}
           onClick={() => useUiStore.getState().openDetails()}
         >
           <Icon icon="mdi:tag-multiple-outline" width={16} height={16} />
@@ -203,7 +228,7 @@ export function SelectionBalloon() {
       <>
         <input
           className="input selb-name"
-          placeholder="Nom du groupe"
+          placeholder={t('node.group.namePlaceholder')}
           value={node.data.label}
           onChange={(e) =>
             useFlowStore.getState().updateNodeData(node.id, {
@@ -218,9 +243,10 @@ export function SelectionBalloon() {
             useFlowStore.getState().updateNodeData(node.id, { icon: ic })
           }
         />
-        <label className="selb-swatch" title="Couleur">
+        <label className="selb-swatch" title={t('node.color')}>
           <input
             type="color"
+            aria-label={t('node.color')}
             value={color ?? DEFAULT_ACCENT}
             onChange={(e) =>
               useFlowStore.getState().updateNodeData(node.id, {
@@ -237,9 +263,10 @@ export function SelectionBalloon() {
     const accent = node.data.accent;
     body = (
       <>
-        <label className="selb-swatch" title="Couleur d'accent">
+        <label className="selb-swatch" title={t('node.accentColor')}>
           <input
             type="color"
+            aria-label={t('node.accentColor')}
             value={accent ?? DEFAULT_ACCENT}
             onChange={(e) =>
               useFlowStore.getState().updateNodeData(node.id, {
@@ -249,7 +276,7 @@ export function SelectionBalloon() {
           />
         </label>
         <span className="muted selb-hint">
-          double-clic pour éditer les colonnes
+          {t('node.er.editColumnsHint')}
         </span>
         <Divider />
         <DuplicateBtn n={node} />
@@ -296,7 +323,7 @@ export function SelectionBalloon() {
       <>
         <input
           className="input selb-edge-label"
-          placeholder="Libellé"
+          placeholder={t('node.edge.labelPlaceholder')}
           value={edge.data?.label ?? ''}
           onChange={(e) =>
             useFlowStore.getState().updateEdge(edge.id, {
@@ -311,24 +338,12 @@ export function SelectionBalloon() {
               key={pt}
               type="button"
               data-active={(edge.data?.pathType ?? 'smooth') === pt}
-              title={
-                pt === 'smooth' ? 'Angles' : pt === 'bezier' ? 'Courbe' : 'Droit'
-              }
+              title={t(EDGE_PATH_TITLE_KEY[pt])}
               onClick={() =>
                 useFlowStore.getState().updateEdge(edge.id, { pathType: pt })
               }
             >
-              <Icon
-                icon={
-                  pt === 'smooth'
-                    ? 'mdi:vector-polyline'
-                    : pt === 'bezier'
-                      ? 'mdi:vector-curve'
-                      : 'mdi:vector-line'
-                }
-                width={15}
-                height={15}
-              />
+              <Icon icon={EDGE_PATH_ICON[pt]} width={15} height={15} />
             </button>
           ))}
         </div>
@@ -336,8 +351,8 @@ export function SelectionBalloon() {
           type="button"
           className="btn-icon"
           data-active={dashed}
-          title="Pointillé"
-          aria-label="Pointillé"
+          title={t('node.edge.dashed')}
+          aria-label={t('node.edge.dashed')}
           onClick={() =>
             useFlowStore.getState().updateEdge(edge.id, { dashed: !dashed })
           }
@@ -347,7 +362,7 @@ export function SelectionBalloon() {
         <Divider />
         <select
           className="selb-kind"
-          title="Type de relation"
+          title={t('node.edge.relationType')}
           value={edge.data?.edgeKind ?? ''}
           onChange={(e) =>
             useFlowStore.getState().updateEdge(edge.id, {
@@ -355,12 +370,12 @@ export function SelectionBalloon() {
             })
           }
         >
-          <option value="">Type…</option>
-          <option value="sync">Synchrone</option>
-          <option value="async">Asynchrone</option>
-          <option value="event">Événement</option>
-          <option value="error">Erreur</option>
-          <option value="data">Données</option>
+          <option value="">{t('node.edge.kind.none')}</option>
+          <option value="sync">{t('node.edge.kind.sync')}</option>
+          <option value="async">{t('node.edge.kind.async')}</option>
+          <option value="event">{t('node.edge.kind.event')}</option>
+          <option value="error">{t('node.edge.kind.error')}</option>
+          <option value="data">{t('node.edge.kind.data')}</option>
         </select>
         <Divider />
         <DeleteBtn />

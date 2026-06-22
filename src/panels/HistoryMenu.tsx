@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useDocsStore } from '../docs-store';
 import './HistoryMenu.css';
@@ -6,6 +7,7 @@ import './HistoryMenu.css';
 /** Top-bar "Historique" dropdown: capture a snapshot + restore an earlier one.
  *  (Moved out of the hamburger menu.) Opens downward. */
 export function HistoryMenu() {
+  const { t } = useTranslation();
   const snapshots = useDocsStore((s) => s.snapshots);
   const snapshotNow = useDocsStore((s) => s.snapshotNow);
   const restoreSnapshot = useDocsStore((s) => s.restoreSnapshot);
@@ -19,11 +21,11 @@ export function HistoryMenu() {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    window.addEventListener('pointerdown', onDown);
-    window.addEventListener('keydown', onKey);
+    globalThis.addEventListener('pointerdown', onDown);
+    globalThis.addEventListener('keydown', onKey);
     return () => {
-      window.removeEventListener('pointerdown', onDown);
-      window.removeEventListener('keydown', onKey);
+      globalThis.removeEventListener('pointerdown', onDown);
+      globalThis.removeEventListener('keydown', onKey);
     };
   }, [open]);
 
@@ -41,9 +43,9 @@ export function HistoryMenu() {
         type="button"
         className="hist-btn"
         data-active={open ? 'true' : undefined}
-        aria-label="Historique"
+        aria-label={t('history.title')}
         aria-expanded={open}
-        title="Historique"
+        title={t('history.title')}
         onClick={() => setOpen((v) => !v)}
       >
         <Icon icon="mdi:history" width={16} height={16} />
@@ -57,12 +59,12 @@ export function HistoryMenu() {
             onClick={() => snapshotNow()}
           >
             <Icon icon="mdi:content-save-plus-outline" width={15} height={15} />
-            Enregistrer cette version
+            {t('history.saveVersion')}
           </button>
 
           <div className="hist-list scroll">
             {snapshots.length === 0 ? (
-              <div className="hist-empty muted">Aucun instantané pour l'instant.</div>
+              <div className="hist-empty muted">{t('history.empty')}</div>
             ) : (
               [...snapshots].reverse().map((s) => (
                 <button

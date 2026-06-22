@@ -9,6 +9,7 @@ import {
   setDevPluginEnabled,
 } from '../plugins/loader';
 import { useUiStore } from '../ui-store';
+import { useTranslation, Trans } from 'react-i18next';
 import './PluginsPanel.css';
 
 type DevRow = { id: string; name: string; version: string };
@@ -19,6 +20,7 @@ type DevRow = { id: string; name: string; version: string };
  * fallback. Automatic hot-reload runs in the background (see loader startDevWatch).
  */
 export function DevPanel() {
+  const { t } = useTranslation();
   const showToast = useUiStore((s) => s.showToast);
   const setPluginsDirty = useUiStore((s) => s.setPluginsDirty);
   const devPluginsDir = useUiStore((s) => s.devPluginsDir);
@@ -41,7 +43,7 @@ export function DevPanel() {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    refresh();
   }, [refresh, devPluginsDir]);
 
   // Dev loop: choose a dev folder; plugins load DIRECTLY from there (no copy, no reload).
@@ -52,10 +54,10 @@ export function DevPanel() {
       if (!dir) return; // cancelled
       setDevPluginsDir(dir);
       await loadDevPlugins();
-      showToast('Dossier de dev défini — plugins chargés');
+      showToast(t('dev.dirSetToast'));
       await refresh();
     } catch (e) {
-      showToast(`Échec : ${(e as Error).message}`);
+      showToast(t('dev.failed', { message: (e as Error).message }));
     } finally {
       setBusy(null);
     }
@@ -66,10 +68,10 @@ export function DevPanel() {
     setBusy('__devreload__');
     try {
       await reloadDevPlugins();
-      showToast('Plugins de dev rechargés');
+      showToast(t('dev.reloadedToast'));
       await refresh();
     } catch (e) {
-      showToast(`Échec : ${(e as Error).message}`);
+      showToast(t('dev.failed', { message: (e as Error).message }));
     } finally {
       setBusy(null);
     }
@@ -80,9 +82,13 @@ export function DevPanel() {
     toggleDevPlugin(row.id);
     try {
       await setDevPluginEnabled(row.id, nowEnabled);
-      showToast(`${row.name} ${nowEnabled ? 'activé' : 'désactivé'}`);
+      showToast(
+        nowEnabled
+          ? t('dev.enabledToast', { name: row.name })
+          : t('dev.disabledToast', { name: row.name }),
+      );
     } catch (e) {
-      showToast(`Échec : ${(e as Error).message}`);
+      showToast(t('dev.failed', { message: (e as Error).message }));
     } finally {
       await refresh();
     }
@@ -96,9 +102,9 @@ export function DevPanel() {
       if (!installed) return; // cancelled
       setPluginsDirty(true);
       const name = installed.manifest.name ?? installed.id;
-      showToast(`${name} installé — recharge pour activer`);
+      showToast(t('dev.installedToast', { name }));
     } catch (e) {
-      showToast(`Échec : ${(e as Error).message}`);
+      showToast(t('dev.failed', { message: (e as Error).message }));
     } finally {
       setBusy(null);
     }
@@ -107,8 +113,7 @@ export function DevPanel() {
   if (!isDesktop) {
     return (
       <p className="muted set-p plug-webnote">
-        <Icon icon="mdi:information-outline" width={14} height={14} /> Le mode développeur
-        nécessite l'app bureau (Tauri).
+        <Icon icon="mdi:information-outline" width={14} height={14} /> {t('dev.desktopOnly')}
       </p>
     );
   }
@@ -117,12 +122,14 @@ export function DevPanel() {
     <>
       {/* Dev folder: load built plugins directly, with automatic hot-reload. */}
       <section className="set-card">
-        <div className="set-card-title">Dossier de dev</div>
+        <div className="set-card-title">{t('dev.dirTitle')}</div>
         <div className="set-card-body">
           <p className="muted set-p">
-            Boucle de dev rapide : charge les plugins <strong>construits</strong> directement
-            depuis un dossier (sans copie). Dossier actuel :{' '}
-            <code>{devPluginsDir ?? 'Aucun dossier de dev défini'}</code>.
+            <Trans
+              i18nKey="dev.dirBody"
+              values={{ dir: devPluginsDir ?? t('dev.noDir') }}
+              components={{ s: <strong />, c: <code /> }}
+            />
           </p>
           <div className="plug-dev-actions">
             <button
@@ -131,7 +138,7 @@ export function DevPanel() {
               disabled={busy === '__devdir__'}
               onClick={() => void onPickDevDir()}
             >
-              {busy === '__devdir__' ? '…' : 'Choisir le dossier de dev'}
+              {busy === '__devdir__' ? '…' : t('dev.pickDir')}
             </button>
             <button
               type="button"
@@ -139,19 +146,17 @@ export function DevPanel() {
               disabled={!devPluginsDir || busy === '__devreload__'}
               onClick={() => void onReloadDev()}
             >
-              {busy === '__devreload__' ? '…' : 'Recharger (manuel)'}
+              {busy === '__devreload__' ? '…' : t('dev.reloadManual')}
             </button>
           </div>
           {devPluginsDir && (
             <p className="muted set-p plug-hotreload">
-              <Icon icon="mdi:autorenew" width={14} height={14} /> Hot-reload actif — chaque{' '}
-              <code>dist/</code> reconstruit est rechargé automatiquement. Le bouton «&nbsp;Recharger
-              (manuel)&nbsp;» reste un secours.
+              <Icon icon="mdi:autorenew" width={14} height={14} />{' '}
+              <Trans i18nKey="dev.hotReload" components={{ c: <code /> }} />
             </p>
           )}
           <p className="muted set-p">
-            Construis en continu avec{' '}
-            <code>npm run build:plugin -- plugins/&lt;name&gt; --watch</code>.
+            <Trans i18nKey="dev.buildContinuous" components={{ c: <code /> }} />
           </p>
         </div>
       </section>
@@ -159,36 +164,45 @@ export function DevPanel() {
       {/* Detected dev plugins: per-plugin enable/disable + live status. */}
       <section className="set-card">
         <div className="set-card-title">
-          Plugins détectés
+          <span>{t('dev.detectedTitle')}</span>
           <button
             type="button"
             className="btn-icon plug-refresh"
-            title="Rafraîchir"
-            aria-label="Rafraîchir"
-            onClick={() => void refresh()}
+            title={t('dev.refresh')}
+            aria-label={t('dev.refresh')}
+            onClick={() => {
+              refresh();
+            }}
           >
             <Icon icon="mdi:refresh" width={15} height={15} />
           </button>
         </div>
         <div className="set-card-body">
           {!devPluginsDir && (
-            <p className="muted set-p">Choisis d'abord un dossier de dev ci-dessus.</p>
+            <p className="muted set-p">{t('dev.pickDirFirst')}</p>
           )}
           {devPluginsDir && rows.length === 0 && (
             <p className="muted set-p">
-              Aucun plugin construit détecté. Lance <code>npm run build:plugin</code> pour produire
-              un <code>dist/</code>.
+              <Trans i18nKey="dev.noneDetected" components={{ c: <code /> }} />
             </p>
           )}
           {rows.map((row) => {
             const enabled = !devDisabled.includes(row.id);
             const isLoaded = loadedIds.includes(row.id);
+            let stateLabel: string;
+            if (!enabled) {
+              stateLabel = t('dev.stateDisabled');
+            } else if (isLoaded) {
+              stateLabel = t('dev.stateLoaded');
+            } else {
+              stateLabel = t('dev.statePending');
+            }
             return (
               <label className="switch-row" key={row.id}>
                 <span className="switch-label">
                   {row.name} {row.version && <span className="plug-version">v{row.version}</span>}
                   <span className="switch-sub">
-                    <code>{row.id}</code> — {enabled ? (isLoaded ? 'chargé' : 'en attente') : 'désactivé'}
+                    <code>{row.id}</code> — {stateLabel}
                   </span>
                 </span>
                 <div className="switch" data-on={enabled ? 'true' : undefined}>
@@ -206,11 +220,10 @@ export function DevPanel() {
 
       {/* Local .zip install: test the final artifact without the registry. */}
       <section className="set-card">
-        <div className="set-card-title">Installer depuis un fichier</div>
+        <div className="set-card-title">{t('dev.installFileTitle')}</div>
         <div className="set-card-body">
           <p className="muted set-p">
-            Teste l'artefact final : choisis le <code>plugin.zip</code> produit par{' '}
-            <code>npm run build:plugin</code>.
+            <Trans i18nKey="dev.installFileBody" components={{ c: <code /> }} />
           </p>
           <button
             type="button"
@@ -218,7 +231,7 @@ export function DevPanel() {
             disabled={busy === '__file__'}
             onClick={() => void onInstallFile()}
           >
-            {busy === '__file__' ? '…' : 'Installer depuis un fichier (.zip)'}
+            {busy === '__file__' ? '…' : t('dev.installFileBtn')}
           </button>
         </div>
       </section>

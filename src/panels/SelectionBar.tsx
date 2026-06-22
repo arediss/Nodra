@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useFlowStore } from '../store';
 import { useComponentsStore } from '../components-store';
@@ -6,6 +7,7 @@ import { useUiStore } from '../ui-store';
 import './SelectionBar.css';
 
 export function SelectionBar() {
+  const { t } = useTranslation();
   const selCount = useFlowStore(
     (s) => s.nodes.filter((n) => n.selected && n.type !== 'group').length,
   );
@@ -23,10 +25,10 @@ export function SelectionBar() {
   if (selCount < 2) return null;
 
   const create = () => {
-    const name = draft.trim() || 'Composant';
+    const name = draft.trim() || t('selection.component.defaultName');
     const id = useComponentsStore.getState().createFromSelection(name);
     if (id) {
-      useUiStore.getState().showToast(`Composant « ${name} » créé`);
+      useUiStore.getState().showToast(t('selection.component.created', { name }));
     }
     setNaming(false);
     setDraft('');
@@ -35,13 +37,13 @@ export function SelectionBar() {
   return (
     <div className="selbar">
       <Icon icon="mdi:select-group" width={16} height={16} className="selbar-ico" />
-      <span className="selbar-count">{selCount} blocs sélectionnés</span>
+      <span className="selbar-count">{t('selection.blocksSelected', { count: selCount })}</span>
       {naming ? (
         <>
           <input
             className="input selbar-input"
             autoFocus
-            placeholder="Nom du composant"
+            placeholder={t('selection.component.namePlaceholder')}
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={(e) => {
@@ -53,7 +55,7 @@ export function SelectionBar() {
             }}
           />
           <button type="button" className="btn btn-primary selbar-go" onClick={create}>
-            Créer
+            {t('selection.component.create')}
           </button>
           <button
             type="button"
@@ -63,7 +65,7 @@ export function SelectionBar() {
               setDraft('');
             }}
           >
-            Annuler
+            {t('common.cancel')}
           </button>
         </>
       ) : (
@@ -73,7 +75,7 @@ export function SelectionBar() {
           onClick={() => setNaming(true)}
         >
           <Icon icon="mdi:puzzle-plus-outline" width={15} height={15} />
-          Créer un composant
+          {t('selection.component.createButton')}
         </button>
       )}
     </div>

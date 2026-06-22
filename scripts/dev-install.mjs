@@ -59,7 +59,7 @@ function installOne(dir) {
     return false;
   }
   // Build (no zip needed for a local install).
-  execFileSync('node', [join(root, 'scripts/build-plugin.mjs'), abs, '--no-zip'], {
+  execFileSync(process.execPath, [join(root, 'scripts/build-plugin.mjs'), abs, '--no-zip'], {
     stdio: 'inherit',
   });
   const dist = join(abs, 'dist');

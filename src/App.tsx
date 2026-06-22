@@ -9,6 +9,7 @@ import { FlowBridge } from './plugins/FlowBridgeMount';
 import { PeerAvatars } from './collab/PeerAvatars';
 import { SettingsSheet } from './panels/SettingsSheet';
 import { UpdateBanner } from './panels/UpdateBanner';
+import { AppUpdateBanner } from './panels/AppUpdateBanner';
 import { PluginsReloadBanner } from './panels/PluginsReloadBanner';
 import { MissingPluginsBanner } from './panels/MissingPluginsBanner';
 import { SelectionBar } from './panels/SelectionBar';
@@ -22,11 +23,14 @@ import { useUiStore } from './ui-store';
 import { startAutosave, startAutoSnapshot, saveToFile, openFromFile } from './lib/persistence';
 import { maybeAutoJoin } from './collab/session';
 import { watchSystemTheme } from './lib/theme';
+import { useAppUpdate } from './lib/app-update';
 
 export default function App() {
   useEffect(() => {
     useDocsStore.getState().init();
     maybeAutoJoin();
+    // Check for an app update on launch (desktop only; self-noops on web).
+    void useAppUpdate.getState().check();
     const stopAutosave = startAutosave();
     const stopAutoSnapshot = startAutoSnapshot();
     const stopTheme = watchSystemTheme(() => useUiStore.getState().theme);
@@ -41,15 +45,19 @@ export default function App() {
       } else if (k === 'o') {
         e.preventDefault();
         openFromFile();
+      } else if (k === 'r' && import.meta.env.DEV) {
+        // Dev convenience: ⌘R reloads the webview (Tauri doesn't wire it natively).
+        e.preventDefault();
+        globalThis.location.reload();
       }
     };
-    window.addEventListener('keydown', onKey);
+    globalThis.addEventListener('keydown', onKey);
 
     return () => {
       stopAutosave();
       stopAutoSnapshot();
       stopTheme();
-      window.removeEventListener('keydown', onKey);
+      globalThis.removeEventListener('keydown', onKey);
     };
   }, []);
 
@@ -66,6 +74,7 @@ export default function App() {
           <PeerAvatars />
         </main>
       </div>
+      <AppUpdateBanner />
       <UpdateBanner />
       <PluginsReloadBanner />
       <MissingPluginsBanner />

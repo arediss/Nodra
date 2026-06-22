@@ -22,6 +22,30 @@ const KIND_STYLE: Record<EdgeKind, { color: string; dash?: string }> = {
   data: { color: '#30b0c7' },
 };
 
+type PathParams = Parameters<typeof getSmoothStepPath>[0];
+
+/** Compute the edge path + label position for the source/target geometry. */
+function computeStraightlessPath(
+  pathType: string,
+  params: PathParams,
+): [string, number, number] {
+  if (pathType === 'bezier') {
+    const [p, lx, ly] = getBezierPath(params);
+    return [p, lx, ly];
+  }
+  if (pathType === 'straight') {
+    const [p, lx, ly] = getStraightPath({
+      sourceX: params.sourceX,
+      sourceY: params.sourceY,
+      targetX: params.targetX,
+      targetY: params.targetY,
+    });
+    return [p, lx, ly];
+  }
+  const [p, lx, ly] = getSmoothStepPath({ ...params, borderRadius: 8 });
+  return [p, lx, ly];
+}
+
 /** Squared distance from point p to segment a->b. */
 function distToSegment(p: Pt, a: Pt, b: Pt): number {
   const dx = b.x - a.x;
@@ -61,20 +85,7 @@ export function LabeledEdge(props: EdgeProps<AppEdge>) {
 
   if (wps.length === 0) {
     const pathType = props.data?.pathType ?? 'smooth';
-    const result =
-      pathType === 'bezier'
-        ? getBezierPath(params)
-        : pathType === 'straight'
-          ? getStraightPath({
-              sourceX: props.sourceX,
-              sourceY: props.sourceY,
-              targetX: props.targetX,
-              targetY: props.targetY,
-            })
-          : getSmoothStepPath({ ...params, borderRadius: 8 });
-    edgePath = result[0];
-    labelX = result[1];
-    labelY = result[2];
+    [edgePath, labelX, labelY] = computeStraightlessPath(pathType, params);
   } else {
     const points: Pt[] = [
       { x: props.sourceX, y: props.sourceY },
@@ -161,7 +172,22 @@ export function LabeledEdge(props: EdgeProps<AppEdge>) {
   const kind = props.data?.edgeKind;
   const ks = kind ? KIND_STYLE[kind] : null;
   const baseColor = ks?.color ?? '#b8b8c0';
-  const dashArray = ks ? ks.dash : props.data?.dashed ? '6 5' : undefined;
+  let dashArray: string | undefined;
+  if (ks) {
+    dashArray = ks.dash;
+  } else if (props.data?.dashed) {
+    dashArray = '6 5';
+  }
+
+  let strokeColor: string;
+  if (props.selected) {
+    strokeColor = 'var(--accent)';
+  } else if (hovered) {
+    strokeColor = '#6b7280';
+  } else {
+    strokeColor = baseColor;
+  }
+  const strokeWidth = props.selected || hovered ? 2.4 : 1.6;
 
   return (
     <>
@@ -170,12 +196,8 @@ export function LabeledEdge(props: EdgeProps<AppEdge>) {
         path={edgePath}
         markerEnd={props.markerEnd}
         style={{
-          stroke: props.selected
-            ? 'var(--accent)'
-            : hovered
-              ? '#6b7280'
-              : baseColor,
-          strokeWidth: props.selected ? 2.4 : hovered ? 2.4 : 1.6,
+          stroke: strokeColor,
+          strokeWidth,
           strokeDasharray: dashArray,
           transition: 'stroke 0.12s ease, stroke-width 0.12s ease',
         }}

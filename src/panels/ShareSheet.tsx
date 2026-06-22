@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useTranslation, Trans } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useCollabStore } from '../collab/session';
 import { usePresenceStore, localPeer, setPeerName, getPeerName } from '../collab/presence';
@@ -8,21 +9,26 @@ import './ShareSheet.css';
 
 const TUNNEL_KEY = 'pfd:tunnelBase';
 const isTauri =
-  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  typeof globalThis !== 'undefined' && '__TAURI_INTERNALS__' in globalThis;
 
 const normBase = (b: string): string => {
-  let s = b.trim().replace(/\/+$/, '');
+  let s = b.trim();
+  // Strip trailing slashes without regex backtracking (avoids ReDoS).
+  let end = s.length;
+  while (end > 0 && s.charCodeAt(end - 1) === 47 /* '/' */) end--;
+  s = s.slice(0, end);
   if (s && !/^https?:\/\//i.test(s)) s = 'https://' + s;
   return s;
 };
 
 function PeersList() {
+  const { t } = useTranslation();
   const peers = usePresenceStore((s) => s.peers);
   const sharedDocs = useCollabStore((s) => s.sharedDocs);
   const list = Object.values(peers);
   if (list.length === 0) return null;
   const docName = (id: string | null) =>
-    id ? sharedDocs.find((d) => d.docId === id)?.name ?? 'un doc' : null;
+    id ? sharedDocs.find((d) => d.docId === id)?.name ?? t('share.aDoc') : null;
   return (
     <ul className="shr-peers">
       {list.map((p) => {
@@ -30,9 +36,9 @@ function PeersList() {
         return (
           <li key={p.id} className="shr-peer">
             <span className="shr-peer-dot" style={{ background: p.color }} />
-            <span className="shr-peer-name">{p.name || 'Pair'}</span>
+            <span className="shr-peer-name">{p.name || t('collab.peer')}</span>
             <span className="shr-peer-where muted">
-              {name ? `sur « ${name} »` : 'doc privé'}
+              {name ? t('share.peerOnDoc', { name }) : t('share.privateDoc')}
             </span>
           </li>
         );
@@ -42,6 +48,7 @@ function PeersList() {
 }
 
 export function ShareSheet() {
+  const { t } = useTranslation();
   const open = useUiStore((s) => s.shareOpen);
   const close = useUiStore((s) => s.closeShare);
   const showToast = useUiStore((s) => s.showToast);
@@ -80,9 +87,9 @@ export function ShareSheet() {
   const copy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
-      showToast('Lien copié');
+      showToast(t('share.linkCopied'));
     } catch {
-      showToast('Copie impossible');
+      showToast(t('share.copyFailed'));
     }
   };
   const commitName = () => setPeerName(name);
@@ -98,23 +105,23 @@ export function ShareSheet() {
         className="sheet sheet-sm"
         onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
-        aria-label="Partager"
+        aria-label={t('share.title')}
       >
         <div className="sheet-header">
           <Icon icon="lucide:share-2" width={18} height={18} />
-          <h2 className="sheet-title">Partager</h2>
-          <button type="button" className="sheet-close" onClick={close} aria-label="Fermer">
+          <h2 className="sheet-title">{t('share.title')}</h2>
+          <button type="button" className="sheet-close" onClick={close} aria-label={t('common.close')}>
             <Icon icon="mdi:close" width={16} height={16} />
           </button>
         </div>
 
         <div className="sheet-body">
           {/* Display name (used by presence + cursors) */}
-          <label className="shr-label" htmlFor="shr-name">Ton prénom</label>
+          <label className="shr-label" htmlFor="shr-name">{t('share.yourName')}</label>
           <input
             id="shr-name"
             className="input shr-name"
-            placeholder="ex. Quentin"
+            placeholder={t('share.yourNamePlaceholder')}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onBlur={commitName}
@@ -124,7 +131,7 @@ export function ShareSheet() {
           {/* Document picker — choose what to share + per-doc permission */}
           {canHost ? (
             <>
-              <label className="shr-label shr-label-mt">Documents à partager</label>
+              <div className="shr-label shr-label-mt">{t('share.docsToShare')}</div>
               <ul className="shr-doclist">
                 {docs.map((d) => {
                   const shared = isShared(d.id);
@@ -146,7 +153,7 @@ export function ShareSheet() {
                           type="button"
                           className="shr-doc-perm"
                           data-on={canEditOf(d.id)}
-                          title={canEditOf(d.id) ? 'Édition autorisée' : 'Lecture seule'}
+                          title={canEditOf(d.id) ? t('share.editAllowed') : t('share.readOnly')}
                           onClick={() => setDocEdit(d.id, !canEditOf(d.id))}
                         >
                           <Icon
@@ -154,16 +161,19 @@ export function ShareSheet() {
                             width={13}
                             height={13}
                           />
-                          {canEditOf(d.id) ? 'Édition' : 'Lecture'}
+                          {canEditOf(d.id) ? t('share.edit') : t('share.read')}
                         </button>
                       )}
                       <button
                         type="button"
                         className="shr-doc-toggle"
                         data-on={shared}
-                        onClick={() => (shared ? unshareDoc(d.id) : void shareDoc(d.id))}
+                        onClick={() => {
+                          if (shared) unshareDoc(d.id);
+                          else shareDoc(d.id);
+                        }}
                       >
-                        {shared ? 'Partagé' : 'Partager'}
+                        {shared ? t('share.shared') : t('share.share')}
                       </button>
                     </li>
                   );
@@ -172,7 +182,7 @@ export function ShareSheet() {
             </>
           ) : (
             <p className="shr-hint shr-label-mt">
-              Le partage se lance depuis l'application de bureau Nodra.
+              {t('share.desktopOnlyHint')}
             </p>
           )}
 
@@ -181,26 +191,27 @@ export function ShareSheet() {
             <>
               <div className="shr-status shr-status-mt">
                 <span className="shr-dot" data-on={status === 'connected'} />
-                {status === 'connected' ? 'en ligne' : 'connexion…'} · {peerCount} pair
-                {peerCount > 1 ? 's' : ''}
+                {status === 'connected' ? t('share.online') : t('share.connecting')} ·{' '}
+                {t('share.peerCount', { count: peerCount })}
               </div>
               <PeersList />
 
               {role === 'host' && info && (
                 <>
-                  <label className="shr-label shr-label-mt">Lien — même réseau (LAN)</label>
+                  <label className="shr-label shr-label-mt" htmlFor="shr-lan-link">{t('share.lanLink')}</label>
                   <div className="shr-url">
-                    <input className="input" readOnly value={info.guest_url}
+                    <input id="shr-lan-link" className="input" readOnly value={info.guest_url}
                       onFocus={(e) => e.currentTarget.select()} />
                     <button type="button" className="btn" onClick={() => copy(info.guest_url)}>
                       <Icon icon="mdi:content-copy" width={14} height={14} />
                     </button>
                   </div>
 
-                  <label className="shr-label shr-label-mt">Lien internet (via un tunnel)</label>
+                  <label className="shr-label shr-label-mt" htmlFor="shr-tunnel">{t('share.internetLink')}</label>
                   <input
+                    id="shr-tunnel"
                     className="input shr-tunnel-input"
-                    placeholder="Colle l'URL de ton tunnel, ex. https://xxx.trycloudflare.com"
+                    placeholder={t('share.tunnelPlaceholder')}
                     value={tunnel}
                     onChange={(e) => onTunnel(e.target.value)}
                   />
@@ -214,8 +225,11 @@ export function ShareSheet() {
                     </div>
                   ) : (
                     <p className="shr-hint">
-                      Lance <code>cloudflared tunnel --url http://localhost:{info.port}</code>,
-                      puis colle l'URL <code>https://…</code> ci-dessus.
+                      <Trans
+                        i18nKey="share.tunnelHint"
+                        values={{ port: info.port }}
+                        components={{ cmd: <code />, url: <code /> }}
+                      />
                     </p>
                   )}
                 </>
@@ -224,7 +238,7 @@ export function ShareSheet() {
               <button type="button" className="btn btn-danger shr-action" onClick={() => leave()}>
                 <Icon icon={role === 'host' ? 'mdi:stop-circle-outline' : 'mdi:exit-to-app'}
                   width={15} height={15} />
-                {role === 'host' ? 'Arrêter le partage' : 'Quitter la session'}
+                {role === 'host' ? t('share.stopSharing') : t('share.leaveSession')}
               </button>
             </>
           )}

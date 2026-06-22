@@ -1,4 +1,5 @@
 import { Handle, Position, type NodeProps } from '@xyflow/react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import './UnknownNode.css';
 
@@ -8,9 +9,10 @@ import './UnknownNode.css';
  * preserved on save) so nothing is ever lost.
  */
 export function UnknownNode({ data, type }: NodeProps) {
+  const { t } = useTranslation();
   const label = (data as { label?: string })?.label ?? type;
   return (
-    <div className="unknown-node" title={`Type fourni par un plugin absent : ${type}`}>
+    <div className="unknown-node" title={t('node.unknown.tooltip', { type })}>
       <Handle type="target" position={Position.Left} />
       <Icon icon="mdi:puzzle-remove-outline" width={16} height={16} />
       <span className="unknown-node-label">{label}</span>

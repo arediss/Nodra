@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Icon } from '@iconify/react';
 import { useDocsStore } from '../docs-store';
 import { useCollabStore } from '../collab/session';
@@ -16,6 +17,7 @@ type Tab = { id: string; name: string; kind: 'local' | 'remote'; ownerName?: str
  * tab for actions (share/unshare, edit toggle, export, rename, duplicate, delete).
  */
 export function DocTabs() {
+  const { t } = useTranslation();
   const docs = useDocsStore((s) => s.docs);
   const activeId = useDocsStore((s) => s.activeId);
   const openDoc = useDocsStore((s) => s.openDoc);
@@ -87,27 +89,31 @@ export function DocTabs() {
     // only document actions (export / rename / duplicate / delete).
     for (const def of registries.exporters.all()) {
       items.push({
-        label: `Exporter (${def.label})`,
+        label: t('doc.exportAs', { format: def.label }),
         icon: def.icon ?? 'mdi:file-export-outline',
         onClick: () => exportDoc(id, tab.name, (n) => runExporter(def, n)),
       });
     }
-    items.push({ label: 'Exporter (PNG)', icon: 'mdi:image-outline', onClick: () => exportDoc(id, tab.name, exportPng) });
-    items.push({ label: 'Exporter (SVG)', icon: 'mdi:vector-square', onClick: () => exportDoc(id, tab.name, exportSvg) });
+    items.push(
+      { label: t('doc.exportAs', { format: 'PNG' }), icon: 'mdi:image-outline', onClick: () => exportDoc(id, tab.name, exportPng) },
+      { label: t('doc.exportAs', { format: 'SVG' }), icon: 'mdi:vector-square', onClick: () => exportDoc(id, tab.name, exportSvg) },
+    );
 
     if (tab.kind === 'local') {
-      items.push({ label: 'Renommer', icon: 'mdi:pencil-outline', separatorBefore: true, onClick: () => beginRename(id, tab.name) });
-      items.push({ label: 'Dupliquer', icon: 'mdi:content-copy', onClick: () => duplicateDoc(id) });
-      items.push({
-        label: 'Supprimer',
-        icon: 'mdi:trash-can-outline',
-        danger: true,
-        separatorBefore: true,
-        onClick: () => {
-          if (isMine(id)) unshareDoc(id);
-          deleteDoc(id);
+      items.push(
+        { label: t('common.rename'), icon: 'mdi:pencil-outline', separatorBefore: true, onClick: () => beginRename(id, tab.name) },
+        { label: t('common.duplicate'), icon: 'mdi:content-copy', onClick: () => duplicateDoc(id) },
+        {
+          label: t('common.delete'),
+          icon: 'mdi:trash-can-outline',
+          danger: true,
+          separatorBefore: true,
+          onClick: () => {
+            if (isMine(id)) unshareDoc(id);
+            deleteDoc(id);
+          },
         },
-      });
+      );
     }
 
     setCtx({ x: e.clientX, y: e.clientY, items });
@@ -150,9 +156,17 @@ export function DocTabs() {
               onClick={() => {
                 if (!editing) openDoc(tab.id);
               }}
+              onKeyDown={(e) => {
+                if (!editing && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  openDoc(tab.id);
+                }
+              }}
               onDoubleClick={() => local && beginRename(tab.id, tab.name)}
               onContextMenu={(e) => openMenu(e, tab)}
               title={tab.ownerName ? `${tab.name} · ${tab.ownerName}` : tab.name}
+              role="button"
+              tabIndex={editing ? -1 : 0}
             >
               {editing ? (
                 <input
@@ -182,7 +196,7 @@ export function DocTabs() {
                     <button
                       type="button"
                       className="doctab-close"
-                      aria-label={`Fermer ${tab.name}`}
+                      aria-label={t('doc.closeTab', { name: tab.name })}
                       onClick={(e) => {
                         e.stopPropagation();
                         if (isMine(tab.id)) unshareDoc(tab.id);
@@ -200,8 +214,8 @@ export function DocTabs() {
         <button
           type="button"
           className="doctab-new"
-          aria-label="Nouveau document"
-          title="Nouveau document"
+          aria-label={t('doc.newDocument')}
+          title={t('doc.newDocument')}
           onClick={() => newDoc()}
         >
           <Icon icon="mdi:plus" width={16} height={16} />
