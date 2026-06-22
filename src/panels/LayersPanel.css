@@ -75,3 +75,13 @@
   font-size: 11px;
   text-align: center;
 }
+
+/* Drag-and-drop reparenting feedback. */
+.lay-row[data-drop='true'] {
+  background: var(--accent-soft);
+  box-shadow: inset 0 0 0 1.5px var(--accent);
+}
+.lay-body[data-detach='true'] {
+  box-shadow: inset 0 0 0 1.5px var(--hairline);
+  border-radius: var(--radius-sm);
+}
