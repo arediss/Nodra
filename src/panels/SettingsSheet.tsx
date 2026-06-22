@@ -49,7 +49,7 @@ function ToggleRow({ prefKey, label, sub }: Readonly<{ prefKey: keyof Prefs; lab
   return (
     <label className="switch-row">
       <span className="switch-label">
-        {label}
+        {label}{' '}
         <span className="switch-sub">{sub}</span>
       </span>
       <div className="switch" data-on={on ? 'true' : undefined}>
@@ -72,7 +72,7 @@ function ThemeRow() {
   return (
     <div className="switch-row">
       <span className="switch-label">
-        {t('settings.theme')}
+        {t('settings.theme')}{' '}
         <span className="switch-sub">{t('settings.themeSub')}</span>
       </span>
       <div className="seg" role="group" aria-label={t('settings.theme')}>
@@ -105,7 +105,7 @@ function LangRow() {
   return (
     <div className="switch-row">
       <span className="switch-label">
-        {t('settings.language')}
+        {t('settings.language')}{' '}
         <span className="switch-sub">{t('settings.languageSub')}</span>
       </span>
       <select
@@ -159,12 +159,22 @@ export function SettingsSheet() {
   const current = TABS.find((t) => t.id === tab)!;
 
   return (
-    <div className="sheet-overlay" onMouseDown={close}>
+    <div
+      className="sheet-overlay"
+      onMouseDown={close}
+      role="button"
+      tabIndex={-1}
+      aria-label={tr('common.close')}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') close();
+      }}
+    >
       <div
         className="sheet set-sheet"
         onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-label={tr('settings.title')}
+        tabIndex={-1}
       >
         <aside className="set-nav">
           <div className="set-nav-title">{tr('settings.title')}</div>

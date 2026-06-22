@@ -160,7 +160,6 @@ export function DevPanel() {
           </p>
         </div>
       </section>
-
       {/* Detected dev plugins: per-plugin enable/disable + live status. */}
       <section className="set-card">
         <div className="set-card-title">

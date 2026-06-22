@@ -180,7 +180,7 @@ export function SelectionBalloon() {
     const tagCount = node.data.tags?.length ?? 0;
     body = (
       <>
-        <label className="selb-swatch" title={t('node.accentColor')}>
+        <label className="selb-swatch" title={t('node.accentColor')} aria-label={t('node.accentColor')}>
           <input
             type="color"
             aria-label={t('node.accentColor')}
@@ -243,7 +243,7 @@ export function SelectionBalloon() {
             useFlowStore.getState().updateNodeData(node.id, { icon: ic })
           }
         />
-        <label className="selb-swatch" title={t('node.color')}>
+        <label className="selb-swatch" title={t('node.color')} aria-label={t('node.color')}>
           <input
             type="color"
             aria-label={t('node.color')}
@@ -263,7 +263,7 @@ export function SelectionBalloon() {
     const accent = node.data.accent;
     body = (
       <>
-        <label className="selb-swatch" title={t('node.accentColor')}>
+        <label className="selb-swatch" title={t('node.accentColor')} aria-label={t('node.accentColor')}>
           <input
             type="color"
             aria-label={t('node.accentColor')}

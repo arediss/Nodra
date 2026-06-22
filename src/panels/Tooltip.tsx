@@ -46,6 +46,8 @@ export function Tooltip({
       onMouseEnter={show}
       onMouseLeave={hide}
       onMouseDown={hide}
+      onFocus={show}
+      onBlur={hide}
     >
       {children}
       {pos &&

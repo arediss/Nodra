@@ -64,12 +64,22 @@ export function NodeDetailsSheet() {
   const metaEntries = Object.entries(metadata);
 
   return (
-    <div className="sheet-overlay" onMouseDown={close}>
+    <div
+      className="sheet-overlay"
+      role="button"
+      tabIndex={-1}
+      onMouseDown={close}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') close();
+      }}
+    >
       <div
         className="sheet sheet-sm"
-        onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-label={t('node.details.sheetTitle')}
+        tabIndex={-1}
+        onMouseDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <div className="sheet-header">
           <Icon icon="mdi:tag-multiple-outline" width={18} height={18} />

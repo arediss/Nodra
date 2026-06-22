@@ -35,12 +35,22 @@ export function NamePrompt() {
   };
 
   return (
-    <div className="sheet-overlay" onMouseDown={submit}>
+    <div
+      className="sheet-overlay"
+      role="button"
+      tabIndex={-1}
+      onMouseDown={submit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ' || e.key === 'Escape') submit();
+      }}
+    >
       <div
         className="sheet sheet-sm"
-        onMouseDown={(e) => e.stopPropagation()}
         role="dialog"
         aria-label={t('name.prompt.title')}
+        tabIndex={-1}
+        onMouseDown={(e) => e.stopPropagation()}
+        onKeyDown={(e) => e.stopPropagation()}
       >
         <div className="sheet-header">
           <Icon icon="lucide:user" width={18} height={18} />

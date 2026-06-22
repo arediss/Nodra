@@ -46,17 +46,34 @@ export function ErTableNode({ id, data, selected }: NodeProps<ErTableNodeType>) 
     [data.columns, setColumns, t],
   );
 
-  const onKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if (e.key === 'Escape') {
-      e.stopPropagation();
-      setEditing(false);
-    }
-  }, []);
+  const onKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        setEditing(false);
+        return;
+      }
+      // Keyboard parity with the double-click-to-edit affordance: enter edit
+      // mode on Enter/Space, but only when the card itself is focused (not a
+      // descendant) and not already editing, so typing in inputs is unaffected.
+      if (
+        !editing &&
+        (e.key === 'Enter' || e.key === ' ') &&
+        e.target === e.currentTarget
+      ) {
+        e.preventDefault();
+        setEditing(true);
+      }
+    },
+    [editing],
+  );
 
   return (
     <div
       className={`er-card${selected ? ' er-selected' : ''}${editing ? ' er-editing' : ''}`}
       style={style}
+      role="button"
+      tabIndex={-1}
       onDoubleClick={() => setEditing(true)}
       onKeyDown={onKeyDown}
     >
