@@ -106,7 +106,7 @@ export function Canvas() {
     (id: string) => {
       const cur = useFlowStore.getState().nodes;
       const me = cur.find((n) => n.id === id);
-      if (!me || !me.parentId) return;
+      if (!me?.parentId) return;
       const parent = rf.getNode(me.parentId);
       const pAbs =
         (parent as unknown as { positionAbsolute?: { x: number; y: number } })

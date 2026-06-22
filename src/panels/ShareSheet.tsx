@@ -9,10 +9,14 @@ import './ShareSheet.css';
 
 const TUNNEL_KEY = 'pfd:tunnelBase';
 const isTauri =
-  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  typeof globalThis !== 'undefined' && '__TAURI_INTERNALS__' in globalThis;
 
 const normBase = (b: string): string => {
-  let s = b.trim().replace(/\/+$/, '');
+  let s = b.trim();
+  // Strip trailing slashes without regex backtracking (avoids ReDoS).
+  let end = s.length;
+  while (end > 0 && s.charCodeAt(end - 1) === 47 /* '/' */) end--;
+  s = s.slice(0, end);
   if (s && !/^https?:\/\//i.test(s)) s = 'https://' + s;
   return s;
 };
@@ -127,7 +131,7 @@ export function ShareSheet() {
           {/* Document picker — choose what to share + per-doc permission */}
           {canHost ? (
             <>
-              <label className="shr-label shr-label-mt">{t('share.docsToShare')}</label>
+              <div className="shr-label shr-label-mt">{t('share.docsToShare')}</div>
               <ul className="shr-doclist">
                 {docs.map((d) => {
                   const shared = isShared(d.id);
@@ -164,7 +168,10 @@ export function ShareSheet() {
                         type="button"
                         className="shr-doc-toggle"
                         data-on={shared}
-                        onClick={() => (shared ? unshareDoc(d.id) : void shareDoc(d.id))}
+                        onClick={() => {
+                          if (shared) unshareDoc(d.id);
+                          else shareDoc(d.id);
+                        }}
                       >
                         {shared ? t('share.shared') : t('share.share')}
                       </button>
@@ -191,17 +198,18 @@ export function ShareSheet() {
 
               {role === 'host' && info && (
                 <>
-                  <label className="shr-label shr-label-mt">{t('share.lanLink')}</label>
+                  <label className="shr-label shr-label-mt" htmlFor="shr-lan-link">{t('share.lanLink')}</label>
                   <div className="shr-url">
-                    <input className="input" readOnly value={info.guest_url}
+                    <input id="shr-lan-link" className="input" readOnly value={info.guest_url}
                       onFocus={(e) => e.currentTarget.select()} />
                     <button type="button" className="btn" onClick={() => copy(info.guest_url)}>
                       <Icon icon="mdi:content-copy" width={14} height={14} />
                     </button>
                   </div>
 
-                  <label className="shr-label shr-label-mt">{t('share.internetLink')}</label>
+                  <label className="shr-label shr-label-mt" htmlFor="shr-tunnel">{t('share.internetLink')}</label>
                   <input
+                    id="shr-tunnel"
                     className="input shr-tunnel-input"
                     placeholder={t('share.tunnelPlaceholder')}
                     value={tunnel}

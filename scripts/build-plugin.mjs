@@ -56,7 +56,7 @@ if (!entry) {
   process.exit(1);
 }
 
-const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+const esc = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, String.raw`\$&`);
 
 // Specifier -> window.__nodra key (the host's singletons).
 const SHARED = {
@@ -98,7 +98,7 @@ const hostSharedShim = {
 
     // Subpath of a shared package would bundle a SECOND copy (breaks the single
     // React/@xyflow instance) — reject it (the exact mappings above win first).
-    const sub = new RegExp('^(' + SHARED_ROOTS.map(esc).join('|') + ')\\/');
+    const sub = new RegExp('^(' + SHARED_ROOTS.map(esc).join('|') + String.raw`)\/`);
     b.onResolve({ filter: sub }, (a) => {
       if (a.path in SHARED) return undefined;
       return {

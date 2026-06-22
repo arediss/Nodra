@@ -92,7 +92,7 @@ export function saveToFile(): void {
   a.download = `${sanitizeFilename(data.name)}.json`;
   document.body.appendChild(a);
   a.click();
-  document.body.removeChild(a);
+  a.remove();
   URL.revokeObjectURL(url);
 }
 
@@ -108,58 +108,59 @@ export function openFromFile(): void {
   input.accept = ['application/json', ...[...exts].map((e) => `.${e}`)].join(',');
   input.style.display = 'none';
 
-  input.addEventListener('change', () => {
-    const file = input.files && input.files[0];
+  input.addEventListener('change', async () => {
+    const file = input.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const text = typeof reader.result === 'string' ? reader.result : '';
-      const ext = (file.name.split('.').pop() || '').toLowerCase();
-      const baseName = file.name.replace(/\.[^.]+$/, '') || 'Import';
+    let text: string;
+    try {
+      text = await file.text();
+    } catch {
+      toast(i18n.t('file.readError'));
+      return;
+    }
+    const ext = (file.name.split('.').pop() || '').toLowerCase();
+    const baseName = file.name.replace(/\.[^.]+$/, '') || 'Import';
 
-      // Dispatch to the first matching importer (the registry is filled by
-      // builtins/plugins — the core has no hardcoded format knowledge).
-      for (const def of registries.importers.all()) {
-        if (!(def.extensions?.includes(ext) || def.detect?.(text))) continue;
-        let result;
-        try {
-          result = await def.parse(text);
-        } catch {
-          toast(i18n.t('file.importFailed', { label: def.label }));
-          return;
-        }
-        if (!result || result.diagram.nodes.length === 0) {
-          toast(i18n.t('file.importNothing', { name: file.name }));
-          return;
-        }
-        if (result.replace) {
-          useFlowStore.getState().loadDiagram(result.diagram);
-        } else {
-          useDocsStore.getState().importDiagram({ ...result.diagram, name: baseName });
-        }
-        if (result.note) toast(result.note);
-        return;
-      }
-
-      // Native Nodra JSON (the .json save format) — core fallback.
-      let parsed: unknown;
+    // Dispatch to the first matching importer (the registry is filled by
+    // builtins/plugins — the core has no hardcoded format knowledge).
+    for (const def of registries.importers.all()) {
+      if (!(def.extensions?.includes(ext) || def.detect?.(text))) continue;
+      let result;
       try {
-        parsed = JSON.parse(text);
+        result = await def.parse(text);
       } catch {
-        toast(i18n.t('file.unrecognizedFormat'));
+        toast(i18n.t('file.importFailed', { label: def.label }));
         return;
       }
-      if (!isDiagramFile(parsed)) {
-        toast(i18n.t('file.notADiagram'));
+      if (!result || result.diagram.nodes.length === 0) {
+        toast(i18n.t('file.importNothing', { name: file.name }));
         return;
       }
-      useFlowStore.getState().loadDiagram(parsed);
-    };
-    reader.onerror = () => toast(i18n.t('file.readError'));
-    reader.readAsText(file);
+      if (result.replace) {
+        useFlowStore.getState().loadDiagram(result.diagram);
+      } else {
+        useDocsStore.getState().importDiagram({ ...result.diagram, name: baseName });
+      }
+      if (result.note) toast(result.note);
+      return;
+    }
+
+    // Native Nodra JSON (the .json save format) — core fallback.
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(text);
+    } catch {
+      toast(i18n.t('file.unrecognizedFormat'));
+      return;
+    }
+    if (!isDiagramFile(parsed)) {
+      toast(i18n.t('file.notADiagram'));
+      return;
+    }
+    useFlowStore.getState().loadDiagram(parsed);
   });
 
   document.body.appendChild(input);
   input.click();
-  document.body.removeChild(input);
+  input.remove();
 }

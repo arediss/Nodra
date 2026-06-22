@@ -240,7 +240,7 @@ export const useComponentsStore = create<ComponentsState>((set, get) => ({
           ? ({
               ...n,
               data: { ...n.data, componentVersion: def.version, label: def.name },
-              style: { ...(n.style ?? {}), width: def.width, height: def.height },
+              style: { ...n.style, width: def.width, height: def.height },
             } as AppNode)
           : n,
       );

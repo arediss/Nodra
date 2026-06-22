@@ -26,7 +26,7 @@ type Row = {
 /** Is `a` a strictly newer semver than `b`? Unparseable parts count as 0. */
 function semverGt(a: string, b: string): boolean {
   const parse = (v: string) =>
-    v.trim().replace(/^v/, '').split('+')[0].split('-')[0].split('.').map((n) => parseInt(n, 10) || 0);
+    v.trim().replace(/^v/, '').split('+')[0].split('-')[0].split('.').map((n) => Number.parseInt(n, 10) || 0);
   const pa = parse(a);
   const pb = parse(b);
   for (let i = 0; i < 3; i++) {
@@ -89,7 +89,7 @@ export function PluginsPanel() {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    refresh();
   }, [refresh]);
 
   const onInstall = async (row: Row) => {
@@ -131,13 +131,13 @@ export function PluginsPanel() {
 
       <section className="set-card">
         <div className="set-card-title">
-          {t('pluginspanel.catalogTitle')}
+          <span>{t('pluginspanel.catalogTitle')}</span>
           <button
             type="button"
             className="btn-icon plug-refresh"
             title={t('pluginspanel.refresh')}
             aria-label={t('pluginspanel.refresh')}
-            onClick={() => void refresh()}
+            onClick={() => refresh()}
           >
             <Icon icon="mdi:refresh" width={15} height={15} />
           </button>

@@ -50,8 +50,8 @@ const serializeNode = (n: AppNode): NodeJson => ({
   ...(n.parentId ? { parentId: n.parentId, extent: n.extent } : {}),
   // NodeResizer writes node.width/height (not style) — mirror them so resized
   // groups/containers stay the same size for every peer.
-  ...(n.width != null ? { width: n.width } : {}),
-  ...(n.height != null ? { height: n.height } : {}),
+  ...(n.width == null ? {} : { width: n.width }),
+  ...(n.height == null ? {} : { height: n.height }),
 });
 
 const serializeEdge = (e: AppEdge) => ({

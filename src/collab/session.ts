@@ -15,7 +15,7 @@ import { useFlowStore } from '../store';
 import { i18n } from '../i18n';
 
 const isTauri =
-  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  typeof globalThis !== 'undefined' && '__TAURI_INTERNALS__' in globalThis;
 
 export type ServeInfo = {
   url: string;
@@ -72,7 +72,9 @@ export const useCollabStore = create<CollabState>((set, get) => {
 
     for (const e of entries) {
       if (e.ownerId === me) continue; // my own docs: channel created in shareDoc
-      if (!mgr.channels.has(e.docId)) {
+      if (mgr.channels.has(e.docId)) {
+        ds.updateSharedTab(e.docId, { name: e.name, ownerName: e.ownerName });
+      } else {
         const ch = openChannel({
           wsBase: mgr.wsBase,
           token: mgr.token,
@@ -84,8 +86,6 @@ export const useCollabStore = create<CollabState>((set, get) => {
         mgr.channels.set(e.docId, ch);
         ds.addSharedTab({ id: e.docId, name: e.name, ownerName: e.ownerName });
         ds.openDoc(e.docId); // auto-open the freshly-shared doc
-      } else {
-        ds.updateSharedTab(e.docId, { name: e.name, ownerName: e.ownerName });
       }
     }
 

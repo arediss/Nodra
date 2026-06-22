@@ -205,7 +205,7 @@ export const useDocsStore = create<DocsState>((set, get) => ({
     // watcher calls the channel's bridge.resync() to fill the store from Y.
     if (isVirtual || isMyShared) {
       if (!isVirtual) writeJSON(ACTIVE_KEY, id); // my real shared doc persists active
-      const body = !isVirtual ? readJSON<DocBody>(bodyKey(id)) : null;
+      const body = isVirtual ? null : readJSON<DocBody>(bodyKey(id));
       set({ activeId: id, snapshots: body?.snapshots ?? [] });
       return;
     }

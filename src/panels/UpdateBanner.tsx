@@ -18,7 +18,7 @@ export function UpdateBanner() {
   const count = nodes.reduce((acc, n) => {
     if (n.type !== 'group') return acc;
     const data = n.data as CompData | undefined;
-    if (!data || !data.componentId) return acc;
+    if (!data?.componentId) return acc;
     const def = byId.get(data.componentId);
     if (!def) return acc;
     return def.version > (data.componentVersion ?? 0) ? acc + 1 : acc;
@@ -29,7 +29,7 @@ export function UpdateBanner() {
   const label = t('update.outdatedBlocks', { count });
 
   return (
-    <div className="update-banner" role="status">
+    <output className="update-banner">
       <span className="update-banner-dot">
         <Icon icon="mdi:sync" width={14} height={14} />
       </span>
@@ -49,6 +49,6 @@ export function UpdateBanner() {
       >
         <Icon icon="mdi:close" width={15} height={15} />
       </button>
-    </div>
+    </output>
   );
 }

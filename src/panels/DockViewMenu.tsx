@@ -27,7 +27,7 @@ export function DockViewMenu() {
 
   const openMenu = () => {
     const r = btnRef.current?.getBoundingClientRect();
-    if (r) setCoords({ left: r.left + r.width / 2, bottom: window.innerHeight - r.top + 10 });
+    if (r) setCoords({ left: r.left + r.width / 2, bottom: globalThis.innerHeight - r.top + 10 });
     setOpen(true);
   };
 
@@ -38,11 +38,11 @@ export function DockViewMenu() {
       if (!btnRef.current?.contains(t) && !popRef.current?.contains(t)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    window.addEventListener('pointerdown', onDown);
-    window.addEventListener('keydown', onKey);
+    globalThis.addEventListener('pointerdown', onDown);
+    globalThis.addEventListener('keydown', onKey);
     return () => {
-      window.removeEventListener('pointerdown', onDown);
-      window.removeEventListener('keydown', onKey);
+      globalThis.removeEventListener('pointerdown', onDown);
+      globalThis.removeEventListener('keydown', onKey);
     };
   }, [open]);
 

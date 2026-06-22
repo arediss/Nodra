@@ -44,8 +44,8 @@ export function CanvasSearch() {
         requestAnimationFrame(() => inputRef.current?.select());
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    globalThis.addEventListener('keydown', onKey);
+    return () => globalThis.removeEventListener('keydown', onKey);
   }, []);
 
   const hits: Hit[] = useMemo(() => {
@@ -124,6 +124,9 @@ export function CanvasSearch() {
 
   if (!open) return null;
 
+  let countLabel = '';
+  if (query) countLabel = hits.length ? `${active + 1}/${hits.length}` : '0';
+
   return (
     <div className="csearch" onPointerDown={(e) => e.stopPropagation()}>
       <Icon className="csearch-lead" icon="mdi:magnify" width={16} height={16} />
@@ -145,7 +148,7 @@ export function CanvasSearch() {
         }}
       />
       <span className="csearch-count">
-        {query ? (hits.length ? `${active + 1}/${hits.length}` : '0') : ''}
+        {countLabel}
       </span>
       <button
         type="button"

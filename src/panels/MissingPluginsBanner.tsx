@@ -28,7 +28,10 @@ export function MissingPluginsBanner() {
     (p) => !registries.pluginManifests.get(p.id),
   );
   // A different diagram (different missing set) re-arms a dismissed banner.
-  const missingKey = missing.map((d) => d.id).sort().join(',');
+  const missingKey = missing
+    .map((d) => d.id)
+    .sort((a, b) => a.localeCompare(b))
+    .join(',');
   useEffect(() => {
     setDismissed(false);
   }, [missingKey]);
@@ -62,7 +65,7 @@ export function MissingPluginsBanner() {
   const installable = isDesktop && missing.length === 1 ? missing[0] : null;
 
   return (
-    <div className="update-banner update-banner-warn" role="status">
+    <output className="update-banner update-banner-warn">
       <span className="update-banner-dot">
         <Icon icon="mdi:puzzle-remove-outline" width={14} height={14} />
       </span>
@@ -94,6 +97,6 @@ export function MissingPluginsBanner() {
       >
         <Icon icon="mdi:close" width={15} height={15} />
       </button>
-    </div>
+    </output>
   );
 }

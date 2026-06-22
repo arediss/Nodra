@@ -35,7 +35,7 @@ const isEntry = (e: unknown): e is RegistryEntry => {
     typeof x.name === 'string' &&
     typeof x.version === 'string' &&
     typeof x.download_url === 'string' &&
-    /^https:\/\//.test(x.download_url) &&
+    x.download_url.startsWith('https://') &&
     /^[0-9a-fA-F]{64}$/.test(x.sha256 as unknown as string)
   );
 };

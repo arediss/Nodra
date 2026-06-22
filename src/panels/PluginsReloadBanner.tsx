@@ -14,7 +14,7 @@ export function PluginsReloadBanner() {
   if (!dirty || dismissed) return null;
 
   return (
-    <div className="update-banner" role="status">
+    <output className="update-banner">
       <span className="update-banner-dot">
         <Icon icon="mdi:restart" width={14} height={14} />
       </span>
@@ -24,7 +24,7 @@ export function PluginsReloadBanner() {
       <button
         type="button"
         className="btn btn-primary update-banner-action"
-        onClick={() => window.location.reload()}
+        onClick={() => globalThis.location.reload()}
       >
         {t('banner.reload')}
       </button>
@@ -36,6 +36,6 @@ export function PluginsReloadBanner() {
       >
         <Icon icon="mdi:close" width={15} height={15} />
       </button>
-    </div>
+    </output>
   );
 }

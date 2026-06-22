@@ -21,11 +21,11 @@ export function HistoryMenu() {
       if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
     };
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false);
-    window.addEventListener('pointerdown', onDown);
-    window.addEventListener('keydown', onKey);
+    globalThis.addEventListener('pointerdown', onDown);
+    globalThis.addEventListener('keydown', onKey);
     return () => {
-      window.removeEventListener('pointerdown', onDown);
-      window.removeEventListener('keydown', onKey);
+      globalThis.removeEventListener('pointerdown', onDown);
+      globalThis.removeEventListener('keydown', onKey);
     };
   }, [open]);
 

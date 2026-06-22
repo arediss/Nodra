@@ -43,7 +43,7 @@ const ALL_TABS: { id: TabId; labelKey: string; icon: string; desktopOnly?: boole
 ];
 const TABS = ALL_TABS.filter((t) => !t.desktopOnly || isDesktop);
 
-function ToggleRow({ prefKey, label, sub }: { prefKey: keyof Prefs; label: string; sub: string }) {
+function ToggleRow({ prefKey, label, sub }: Readonly<{ prefKey: keyof Prefs; label: string; sub: string }>) {
   const on = useUiStore((s) => s.prefs[prefKey]);
   const setPref = useUiStore((s) => s.setPref);
   return (
@@ -124,7 +124,7 @@ function LangRow() {
   );
 }
 
-function Card({ title, children }: { title: string; children: React.ReactNode }) {
+function Card({ title, children }: Readonly<{ title: string; children: React.ReactNode }>) {
   return (
     <section className="set-card">
       <div className="set-card-title">{title}</div>
@@ -150,8 +150,8 @@ export function SettingsSheet() {
   useEffect(() => {
     if (!open) return;
     const onKey = (e: KeyboardEvent) => e.key === 'Escape' && close();
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    globalThis.addEventListener('keydown', onKey);
+    return () => globalThis.removeEventListener('keydown', onKey);
   }, [open, close]);
 
   if (!open) return null;

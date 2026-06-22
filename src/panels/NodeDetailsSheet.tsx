@@ -87,13 +87,13 @@ export function NodeDetailsSheet() {
           )}
           {tfAddr && (
             <div className="nds-field">
-              <label className="shr-label">{t('node.details.iacAddress')}</label>
+              <span className="shr-label">{t('node.details.iacAddress')}</span>
               <code className="nds-addr">{tfAddr}</code>
             </div>
           )}
 
           <div className="nds-field">
-            <label className="shr-label">{t('node.details.tags')}</label>
+            <label className="shr-label" htmlFor="nds-tag-input">{t('node.details.tags')}</label>
             <div className="nds-tags">
               {tags.map((tag) => (
                 <span key={tag} className="nds-tag">
@@ -105,6 +105,7 @@ export function NodeDetailsSheet() {
               ))}
             </div>
             <input
+              id="nds-tag-input"
               className="input"
               placeholder={t('node.details.tagPlaceholder')}
               value={tagDraft}
@@ -120,7 +121,7 @@ export function NodeDetailsSheet() {
           </div>
 
           <div className="nds-field">
-            <label className="shr-label">{t('node.details.metadata')}</label>
+            <label className="shr-label" htmlFor="nds-meta-key-input">{t('node.details.metadata')}</label>
             {metaEntries.map(([k, v]) => (
               <div className="nds-meta-row" key={k}>
                 <span className="nds-meta-key">{k}</span>
@@ -141,6 +142,7 @@ export function NodeDetailsSheet() {
             ))}
             <div className="nds-meta-add">
               <input
+                id="nds-meta-key-input"
                 className="input"
                 placeholder={t('node.details.metaKeyPlaceholder')}
                 value={kDraft}

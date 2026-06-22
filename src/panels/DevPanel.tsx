@@ -43,7 +43,7 @@ export function DevPanel() {
   }, []);
 
   useEffect(() => {
-    void refresh();
+    refresh();
   }, [refresh, devPluginsDir]);
 
   // Dev loop: choose a dev folder; plugins load DIRECTLY from there (no copy, no reload).
@@ -164,13 +164,15 @@ export function DevPanel() {
       {/* Detected dev plugins: per-plugin enable/disable + live status. */}
       <section className="set-card">
         <div className="set-card-title">
-          {t('dev.detectedTitle')}
+          <span>{t('dev.detectedTitle')}</span>
           <button
             type="button"
             className="btn-icon plug-refresh"
             title={t('dev.refresh')}
             aria-label={t('dev.refresh')}
-            onClick={() => void refresh()}
+            onClick={() => {
+              refresh();
+            }}
           >
             <Icon icon="mdi:refresh" width={15} height={15} />
           </button>
@@ -187,11 +189,14 @@ export function DevPanel() {
           {rows.map((row) => {
             const enabled = !devDisabled.includes(row.id);
             const isLoaded = loadedIds.includes(row.id);
-            const stateLabel = enabled
-              ? isLoaded
-                ? t('dev.stateLoaded')
-                : t('dev.statePending')
-              : t('dev.stateDisabled');
+            let stateLabel: string;
+            if (!enabled) {
+              stateLabel = t('dev.stateDisabled');
+            } else if (isLoaded) {
+              stateLabel = t('dev.stateLoaded');
+            } else {
+              stateLabel = t('dev.statePending');
+            }
             return (
               <label className="switch-row" key={row.id}>
                 <span className="switch-label">

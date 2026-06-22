@@ -84,13 +84,15 @@ export function HamburgerMenu() {
     close();
     try {
       const r = await fn(diagramName);
-      showToast(
-        r.saved
-          ? r.path
-            ? t('menu.exportedTo', { path: r.path })
-            : t('menu.exported')
-          : t('menu.exportCancelled'),
-      );
+      let toastMsg: string;
+      if (!r.saved) {
+        toastMsg = t('menu.exportCancelled');
+      } else if (r.path) {
+        toastMsg = t('menu.exportedTo', { path: r.path });
+      } else {
+        toastMsg = t('menu.exported');
+      }
+      showToast(toastMsg);
     } catch {
       showToast(t('menu.exportFailed'));
     }

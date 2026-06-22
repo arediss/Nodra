@@ -6,7 +6,7 @@ import type { RegistryEntry } from './remoteRegistry';
 export type InstalledPlugin = { id: string; manifest: PluginManifest };
 
 export const isDesktop =
-  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  typeof globalThis !== 'undefined' && '__TAURI_INTERNALS__' in globalThis;
 
 async function invoke<T>(cmd: string, args?: Record<string, unknown>): Promise<T> {
   const { invoke } = await import('@tauri-apps/api/core');

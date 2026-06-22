@@ -128,8 +128,8 @@ export function BottomDock() {
         setTool(next);
       }
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    globalThis.addEventListener('keydown', onKey);
+    return () => globalThis.removeEventListener('keydown', onKey);
   }, [setTool, editingAllowed]);
 
   return (

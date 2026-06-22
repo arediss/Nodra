@@ -36,7 +36,7 @@ type Props = {
 };
 
 /** Dropdown to set (or clear) a group's header icon. */
-export function GroupIconPicker({ value, onPick }: Props) {
+export function GroupIconPicker({ value, onPick }: Readonly<Props>) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);

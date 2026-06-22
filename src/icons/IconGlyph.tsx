@@ -13,12 +13,12 @@ export function IconGlyph({
   refId,
   name,
   size = 40,
-}: {
+}: Readonly<{
   source: IconSource;
   refId: string;
   name?: string;
   size?: number;
-}) {
+}>) {
   const [broken, setBroken] = useState(false);
 
   if (source === 'iconify') {

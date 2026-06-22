@@ -37,7 +37,7 @@ export function createProvider(opts: {
   let reconnect: ReturnType<typeof setTimeout> | null = null;
 
   const sendFrame = (tag: number, payload?: Uint8Array) => {
-    if (!ws || ws.readyState !== WebSocket.OPEN) return;
+    if (ws?.readyState !== WebSocket.OPEN) return;
     const body = payload ?? new Uint8Array(0);
     const frame = new Uint8Array(1 + body.length);
     frame[0] = tag;

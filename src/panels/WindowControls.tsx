@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import './WindowControls.css';
 
 const isTauri =
-  typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+  typeof globalThis.window !== 'undefined' && '__TAURI_INTERNALS__' in globalThis;
 
 export function WindowControls() {
   const { t } = useTranslation();

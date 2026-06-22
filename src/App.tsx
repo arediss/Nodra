@@ -48,16 +48,16 @@ export default function App() {
       } else if (k === 'r' && import.meta.env.DEV) {
         // Dev convenience: ⌘R reloads the webview (Tauri doesn't wire it natively).
         e.preventDefault();
-        window.location.reload();
+        globalThis.location.reload();
       }
     };
-    window.addEventListener('keydown', onKey);
+    globalThis.addEventListener('keydown', onKey);
 
     return () => {
       stopAutosave();
       stopAutoSnapshot();
       stopTheme();
-      window.removeEventListener('keydown', onKey);
+      globalThis.removeEventListener('keydown', onKey);
     };
   }, []);
 

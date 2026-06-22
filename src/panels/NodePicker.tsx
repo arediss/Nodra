@@ -9,8 +9,7 @@ import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import type { TFunction } from 'i18next';
 import { Icon } from '@iconify/react';
-import { searchIcons, getIcon, getProviders, type IconEntry } from '../icons/catalog';
-import type { IconSource } from '../icons/catalog';
+import { searchIcons, getIcon, getProviders, type IconEntry, type IconSource } from '../icons/catalog';
 import { IconGlyph } from '../icons/IconGlyph';
 import * as registries from '../plugins/registries';
 import { useRegistryVersion } from '../plugins/useRegistry';
@@ -82,48 +81,27 @@ function resolve(id: string, defs: ComponentDef[]): PickItem | null {
   return null;
 }
 
-function buildSections(
-  query: string,
-  recents: string[],
-  defs: ComponentDef[],
-  expanded: string | null,
-  t: TFunction,
-): Section[] {
-  const q = query.trim();
-
-  if (q) {
-    const ql = q.toLowerCase();
-    const items: PickItem[] = [];
-    for (const t of BUILTIN_TEMPLATES) {
-      if (t.label.toLowerCase().includes(ql) || t.id.includes(ql)) items.push(builtinItem(t));
-    }
-    for (const d of defs) {
-      if (d.name.toLowerCase().includes(ql)) items.push(componentItem(d));
-    }
-    for (const e of searchIcons(q)) items.push(iconItem(e));
-    return [{ key: 'results', title: t('picker.section.results'), items }];
+function searchSections(query: string, defs: ComponentDef[], t: TFunction): Section[] {
+  const ql = query.toLowerCase();
+  const items: PickItem[] = [];
+  for (const tpl of BUILTIN_TEMPLATES) {
+    if (tpl.label.toLowerCase().includes(ql) || tpl.id.includes(ql)) items.push(builtinItem(tpl));
   }
+  for (const d of defs) {
+    if (d.name.toLowerCase().includes(ql)) items.push(componentItem(d));
+  }
+  for (const e of searchIcons(query)) items.push(iconItem(e));
+  return [{ key: 'results', title: t('picker.section.results'), items }];
+}
 
-  const sections: Section[] = [];
-
-  const rec = recents
-    .map((id) => resolve(id, defs))
-    .filter((x): x is PickItem => x !== null);
-  if (rec.length) sections.push({ key: 'recents', title: t('picker.section.recents'), items: rec });
-
-  sections.push({ key: 'builtins', title: t('picker.section.elements'), items: BUILTIN_TEMPLATES.map(builtinItem) });
-
-  // Saved components right after the built-ins so they're easy to find (not
-  // buried under every icon provider).
-  if (defs.length)
-    sections.push({ key: 'components', title: t('picker.section.components'), items: defs.map(componentItem) });
-
+function providerSections(expanded: string | null): Section[] {
   const byProvider = new Map<string, IconEntry[]>();
   for (const e of searchIcons('', 'all')) {
     const arr = byProvider.get(e.provider);
     if (arr) arr.push(e);
     else byProvider.set(e.provider, [e]);
   }
+  const sections: Section[] = [];
   for (const prov of getProviders()) {
     if (prov === 'all') continue;
     const entries = byProvider.get(prov);
@@ -139,6 +117,35 @@ function buildSections(
       expandable: entries.length > PROVIDER_CAP && !isExp,
     });
   }
+  return sections;
+}
+
+function buildSections(
+  query: string,
+  recents: string[],
+  defs: ComponentDef[],
+  expanded: string | null,
+  t: TFunction,
+): Section[] {
+  const q = query.trim();
+
+  if (q) return searchSections(q, defs, t);
+
+  const sections: Section[] = [];
+
+  const rec = recents
+    .map((id) => resolve(id, defs))
+    .filter((x): x is PickItem => x !== null);
+  if (rec.length) sections.push({ key: 'recents', title: t('picker.section.recents'), items: rec });
+
+  sections.push({ key: 'builtins', title: t('picker.section.elements'), items: BUILTIN_TEMPLATES.map(builtinItem) });
+
+  // Saved components right after the built-ins so they're easy to find (not
+  // buried under every icon provider).
+  if (defs.length)
+    sections.push({ key: 'components', title: t('picker.section.components'), items: defs.map(componentItem) });
+
+  sections.push(...providerSections(expanded));
 
   return sections;
 }

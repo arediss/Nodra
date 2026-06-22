@@ -52,19 +52,19 @@ startDevWatch();
 
 // Mark the desktop (Tauri) context so we can round the frameless window, and
 // suppress the native webview context menu (reload/inspect) in favour of ours.
-if (typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window) {
+if (typeof globalThis.window !== 'undefined' && '__TAURI_INTERNALS__' in globalThis) {
   document.documentElement.classList.add('is-tauri');
-  window.addEventListener('contextmenu', (e) => e.preventDefault());
+  globalThis.addEventListener('contextmenu', (e) => e.preventDefault());
 }
 
 // Trackpad pinch fires both a wheel event (ReactFlow zoom) AND WebKit "magnify"
 // gesture events (webview page zoom) — the latter scales/scrolls the whole app.
 // Suppress the native page zoom; ReactFlow keeps zooming via wheel.
 const stopGesture = (e: Event) => e.preventDefault();
-window.addEventListener('gesturestart', stopGesture);
-window.addEventListener('gesturechange', stopGesture);
-window.addEventListener('gestureend', stopGesture);
-window.addEventListener(
+globalThis.addEventListener('gesturestart', stopGesture);
+globalThis.addEventListener('gesturechange', stopGesture);
+globalThis.addEventListener('gestureend', stopGesture);
+globalThis.addEventListener(
   'wheel',
   (e) => {
     if (e.ctrlKey) e.preventDefault();

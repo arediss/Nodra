@@ -94,22 +94,26 @@ export function DocTabs() {
         onClick: () => exportDoc(id, tab.name, (n) => runExporter(def, n)),
       });
     }
-    items.push({ label: t('doc.exportAs', { format: 'PNG' }), icon: 'mdi:image-outline', onClick: () => exportDoc(id, tab.name, exportPng) });
-    items.push({ label: t('doc.exportAs', { format: 'SVG' }), icon: 'mdi:vector-square', onClick: () => exportDoc(id, tab.name, exportSvg) });
+    items.push(
+      { label: t('doc.exportAs', { format: 'PNG' }), icon: 'mdi:image-outline', onClick: () => exportDoc(id, tab.name, exportPng) },
+      { label: t('doc.exportAs', { format: 'SVG' }), icon: 'mdi:vector-square', onClick: () => exportDoc(id, tab.name, exportSvg) },
+    );
 
     if (tab.kind === 'local') {
-      items.push({ label: t('common.rename'), icon: 'mdi:pencil-outline', separatorBefore: true, onClick: () => beginRename(id, tab.name) });
-      items.push({ label: t('common.duplicate'), icon: 'mdi:content-copy', onClick: () => duplicateDoc(id) });
-      items.push({
-        label: t('common.delete'),
-        icon: 'mdi:trash-can-outline',
-        danger: true,
-        separatorBefore: true,
-        onClick: () => {
-          if (isMine(id)) unshareDoc(id);
-          deleteDoc(id);
+      items.push(
+        { label: t('common.rename'), icon: 'mdi:pencil-outline', separatorBefore: true, onClick: () => beginRename(id, tab.name) },
+        { label: t('common.duplicate'), icon: 'mdi:content-copy', onClick: () => duplicateDoc(id) },
+        {
+          label: t('common.delete'),
+          icon: 'mdi:trash-can-outline',
+          danger: true,
+          separatorBefore: true,
+          onClick: () => {
+            if (isMine(id)) unshareDoc(id);
+            deleteDoc(id);
+          },
         },
-      });
+      );
     }
 
     setCtx({ x: e.clientX, y: e.clientY, items });
@@ -152,9 +156,17 @@ export function DocTabs() {
               onClick={() => {
                 if (!editing) openDoc(tab.id);
               }}
+              onKeyDown={(e) => {
+                if (!editing && (e.key === 'Enter' || e.key === ' ')) {
+                  e.preventDefault();
+                  openDoc(tab.id);
+                }
+              }}
               onDoubleClick={() => local && beginRename(tab.id, tab.name)}
               onContextMenu={(e) => openMenu(e, tab)}
               title={tab.ownerName ? `${tab.name} · ${tab.ownerName}` : tab.name}
+              role="button"
+              tabIndex={editing ? -1 : 0}
             >
               {editing ? (
                 <input
