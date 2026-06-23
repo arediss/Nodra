@@ -7,7 +7,21 @@ import { WindowControls } from './WindowControls';
 import { HamburgerMenu } from './HamburgerMenu';
 import { HistoryMenu } from './HistoryMenu';
 import { DocTabs } from './DocTabs';
+import { getCurrentWindow } from '@tauri-apps/api/window';
+import type { MouseEvent } from 'react';
 import './Toolbar.css';
+
+const isTauri =
+  typeof globalThis.window !== 'undefined' && '__TAURI_INTERNALS__' in globalThis;
+
+/** Double-clicking the titlebar (the drag region itself, not a control) toggles
+ *  maximize — restores the native macOS behaviour lost with `decorations: false`. */
+function onTitlebarDoubleClick(e: MouseEvent) {
+  if (!isTauri) return;
+  const el = e.target as HTMLElement;
+  if (!el.hasAttribute('data-tauri-drag-region')) return;
+  void getCurrentWindow().toggleMaximize();
+}
 
 export function Toolbar() {
   const { t } = useTranslation();
@@ -17,7 +31,7 @@ export function Toolbar() {
   const peerCount = usePresenceStore((s) => Object.keys(s.peers).length);
 
   return (
-    <header className="tb-bar" data-tauri-drag-region>
+    <header className="tb-bar" data-tauri-drag-region onDoubleClick={onTitlebarDoubleClick}>
       <div className="tb-zone tb-zone-left" data-tauri-drag-region>
         <WindowControls />
         <HamburgerMenu />

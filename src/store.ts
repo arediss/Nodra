@@ -44,6 +44,22 @@ function migrateNodeSizes(nodes: AppNode[]): AppNode[] {
   });
 }
 
+/**
+ * Drop a `parentId` (and its `extent`) when it doesn't reference an existing
+ * node — e.g. a malformed import where a child points at an edge or a removed
+ * cell. ReactFlow otherwise crashes reading `parent.measured` on undefined.
+ */
+function sanitizeParents(nodes: AppNode[]): AppNode[] {
+  const ids = new Set(nodes.map((n) => n.id));
+  return nodes.map((n) => {
+    if (n.parentId && !ids.has(n.parentId)) {
+      const { parentId: _p, extent: _e, ...rest } = n;
+      return rest as AppNode;
+    }
+    return n;
+  });
+}
+
 export type FlowState = {
   nodes: AppNode[];
   edges: AppEdge[];
@@ -286,7 +302,7 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
 
   loadDiagram: (file) =>
     set({
-      nodes: migrateNodeSizes(file.nodes ?? []),
+      nodes: sanitizeParents(migrateNodeSizes(file.nodes ?? [])),
       edges: file.edges ?? [],
       diagramName: file.name ?? 'Sans titre',
       filePlugins: file.plugins ?? [],
