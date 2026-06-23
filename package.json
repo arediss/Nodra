@@ -14,7 +14,7 @@
     "tauri": "tauri"
   },
   "dependencies": {
-    "@dagrejs/dagre": "^1.1.4",
+    "@dagrejs/dagre": "^3.0.0",
     "@iconify/react": "^5.0.2",
     "@tauri-apps/plugin-dialog": "^2.7.1",
     "@tauri-apps/plugin-process": "^2.3.1",
