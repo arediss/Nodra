@@ -31,16 +31,20 @@ export function GroupNode({ data, selected }: NodeProps<GroupNodeType>) {
         className={`grp-root grp-${variant}${selected ? ' grp-selected' : ''}`}
         style={style}
       >
-        <div className="grp-header">
-          <span className="grp-glyph" aria-hidden="true">
-            {data.icon ? (
-              <Icon icon={data.icon} width={13} height={13} />
-            ) : (
-              VARIANT_GLYPH[variant]
-            )}
-          </span>
-          <span className="grp-label">{data.label}</span>
-        </div>
+        {/* No header chip for a bare frame (no label, no icon) — it would just be
+            an empty pill (e.g. an imported draw.io container with no title). */}
+        {(data.label.trim() || data.icon) && (
+          <div className="grp-header">
+            <span className="grp-glyph" aria-hidden="true">
+              {data.icon ? (
+                <Icon icon={data.icon} width={13} height={13} />
+              ) : (
+                VARIANT_GLYPH[variant]
+              )}
+            </span>
+            {data.label.trim() ? <span className="grp-label">{data.label}</span> : null}
+          </div>
+        )}
       </div>
     </>
   );
