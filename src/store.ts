@@ -60,6 +60,31 @@ function sanitizeParents(nodes: AppNode[]): AppNode[] {
   });
 }
 
+/**
+ * Keep every group BELOW the non-group nodes — groups always render on the bottom
+ * "layer 0", even a group nested in a group. Groups come first in the array (lower
+ * z), ordered so a parent group precedes a nested child group; non-groups follow
+ * in their existing order, so a non-group child still comes after its group parent
+ * (ReactFlow's parent-before-child requirement holds).
+ */
+export function groupsToBottom(nodes: AppNode[]): AppNode[] {
+  const groups = nodes.filter((n) => n.type === 'group');
+  if (groups.length === 0) return nodes;
+  const others = nodes.filter((n) => n.type !== 'group');
+  const byId = new Map(groups.map((g) => [g.id, g]));
+  const seen = new Set<string>();
+  const ordered: AppNode[] = [];
+  const visit = (g: AppNode) => {
+    if (seen.has(g.id)) return;
+    seen.add(g.id);
+    const parent = g.parentId ? byId.get(g.parentId) : undefined;
+    if (parent) visit(parent);
+    ordered.push(g);
+  };
+  for (const g of groups) visit(g);
+  return [...ordered, ...others];
+}
+
 export type FlowState = {
   nodes: AppNode[];
   edges: AppEdge[];
@@ -185,7 +210,7 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
   addNode: (node) => {
     if (get().readOnly) return;
     get().commit();
-    set({ nodes: [...get().nodes, node] });
+    set({ nodes: groupsToBottom([...get().nodes, node]) });
   },
 
   setNodes: (nodes) => set({ nodes }),
@@ -302,7 +327,7 @@ export const useFlowStore = create<FlowState>()((set, get) => ({
 
   loadDiagram: (file) =>
     set({
-      nodes: sanitizeParents(migrateNodeSizes(file.nodes ?? [])),
+      nodes: groupsToBottom(sanitizeParents(migrateNodeSizes(file.nodes ?? []))),
       edges: file.edges ?? [],
       diagramName: file.name ?? 'Sans titre',
       filePlugins: file.plugins ?? [],

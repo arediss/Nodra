@@ -13,7 +13,7 @@ import {
   type Node,
   type Edge,
 } from '@xyflow/react';
-import { useFlowStore, newId } from '../store';
+import { useFlowStore, newId, groupsToBottom } from '../store';
 import { useUiStore } from '../ui-store';
 import { useDocsStore } from '../docs-store';
 import { useCollabStore } from '../collab/session';
@@ -174,7 +174,7 @@ export function Canvas() {
         } as AppNode;
       });
       useFlowStore.getState().commit(); // undoable: standalone reparent (no drag)
-      setNodes(next);
+      setNodes(groupsToBottom(next));
     },
     [rf, setNodes],
   );
@@ -284,14 +284,9 @@ export function Canvas() {
         return n;
       });
       if (captured.length) {
-        // ReactFlow requires a parent to appear BEFORE its children in the nodes
-        // array. The captured nodes were created before this group, so move them
-        // right after it — otherwise the parentId is silently ignored (the bug).
-        const cap = new Set(captured);
-        const ordered = next.filter((n) => !cap.has(n.id));
-        const gi = ordered.findIndex((n) => n.id === grp.id);
-        ordered.splice(gi + 1, 0, ...next.filter((n) => cap.has(n.id)));
-        setNodes(ordered);
+        // Groups stay on the bottom layer; a non-group child follows its parent,
+        // which keeps ReactFlow's parent-before-child requirement satisfied.
+        setNodes(groupsToBottom(next));
         requestAnimationFrame(() => captured.forEach((id) => updateNodeInternals(id)));
       }
     },
@@ -493,7 +488,7 @@ export function Canvas() {
       }
 
       if (nextNodes) {
-        setNodes(nextNodes);
+        setNodes(groupsToBottom(nextNodes));
         // Refresh ReactFlow's cached absolute position after a parentId change,
         // otherwise the NEXT intersection test uses stale bounds and a re-drop
         // into a group is no longer detected (#2 — "se fix plus au groupe").
