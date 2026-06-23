@@ -31,6 +31,9 @@ export type IconNodeData = {
   isImage?: boolean;
   /** show a card background/frame behind an image block (default: none). */
   imageFramed?: boolean;
+  /** render the icon WITHOUT the card background — a bare glyph + label, like a
+   *  draw.io shape. Default: false (carded). Set on imported icons. */
+  frameless?: boolean;
 };
 
 /** A resizable container that visually groups child nodes (AWS account, VPC, "Cloud"...). */

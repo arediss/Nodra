@@ -1,7 +1,7 @@
 {
   "name": "nodra",
   "private": true,
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Self-hosted cloud-architecture & diagram editor (ReactFlow + Tauri). AWS/GCP/Azure icon packs, ER diagrams, containers, PNG/SVG export.",
   "scripts": {

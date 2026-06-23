@@ -6,13 +6,14 @@ import {
   BackgroundVariant,
   MiniMap,
   ConnectionMode,
+  PanOnScrollMode,
   MarkerType,
   useReactFlow,
   useUpdateNodeInternals,
   type Node,
   type Edge,
 } from '@xyflow/react';
-import { useFlowStore, newId } from '../store';
+import { useFlowStore, newId, groupsToBottom } from '../store';
 import { useUiStore } from '../ui-store';
 import { useDocsStore } from '../docs-store';
 import { useCollabStore } from '../collab/session';
@@ -69,6 +70,59 @@ export function Canvas() {
     if (tool !== 'connect') setPendingSource(null);
   }, [tool]);
 
+  // Tauri's macOS webview is WebKit, which delivers a trackpad PINCH as Safari
+  // `gesture*` events. d3-zoom/ReactFlow only listen to `wheel`, so pinch never
+  // zooms there (two-finger scroll pans via panOnScroll). Wire pinch -> zoom by
+  // hand: read the cumulative `scale` and zoom around the gesture point.
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>('.react-flow');
+    if (!root) return;
+    let base = 1;
+    const onStart = (e: Event) => {
+      e.preventDefault();
+      base = rf.getZoom();
+    };
+    const onChange = (e: Event) => {
+      e.preventDefault();
+      const g = e as Event & { scale: number; clientX: number; clientY: number };
+      const { x, y, zoom } = rf.getViewport();
+      const nz = Math.min(4, Math.max(0.2, base * g.scale));
+      const rect = root.getBoundingClientRect();
+      const px = g.clientX - rect.left;
+      const py = g.clientY - rect.top;
+      const k = nz / zoom;
+      rf.setViewport({ x: px - (px - x) * k, y: py - (py - y) * k, zoom: nz });
+    };
+    const onEnd = (e: Event) => e.preventDefault();
+    root.addEventListener('gesturestart', onStart);
+    root.addEventListener('gesturechange', onChange);
+    root.addEventListener('gestureend', onEnd);
+    return () => {
+      root.removeEventListener('gesturestart', onStart);
+      root.removeEventListener('gesturechange', onChange);
+      root.removeEventListener('gestureend', onEnd);
+    };
+  }, [rf]);
+
+  // Guaranteed keyboard zoom (⌘/Ctrl + +/-/0) — works regardless of trackpad.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+      if (e.key === '=' || e.key === '+') {
+        e.preventDefault();
+        void rf.zoomIn();
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        void rf.zoomOut();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        void rf.zoomTo(1);
+      }
+    };
+    globalThis.addEventListener('keydown', onKey);
+    return () => globalThis.removeEventListener('keydown', onKey);
+  }, [rf]);
+
   // While a connection is being dragged, reveal every block's handles so you can
   // see where the cable can land (#6).
   const [drawingEdge, setDrawingEdge] = useState(false);
@@ -119,7 +173,8 @@ export function Canvas() {
           position: { x: pAbs.x + n.position.x, y: pAbs.y + n.position.y },
         } as AppNode;
       });
-      setNodes(next);
+      useFlowStore.getState().commit(); // undoable: standalone reparent (no drag)
+      setNodes(groupsToBottom(next));
     },
     [rf, setNodes],
   );
@@ -183,6 +238,19 @@ export function Canvas() {
     e.dataTransfer.dropEffect = 'move';
   }, []);
 
+  // Commit ONE history entry before a key/programmatic delete, so the node and
+  // its connected edges revert together on undo, then let the delete proceed.
+  // ReactFlow calls this even on an empty Backspace (nothing selected) — only
+  // commit when something is actually being deleted, else a stray keypress would
+  // record a no-op step and wipe the redo stack.
+  const onBeforeDelete = useCallback(
+    async ({ nodes, edges }: { nodes: Node[]; edges: Edge[] }) => {
+      if (nodes.length || edges.length) useFlowStore.getState().commit();
+      return true;
+    },
+    [],
+  );
+
   // Absorb into a group every non-group, non-child node whose CENTRE sits inside
   // it. Used both when a group is CREATED over existing nodes and when one is
   // DRAGGED over them. Reparents (parentId + position relative to the group), so
@@ -216,14 +284,9 @@ export function Canvas() {
         return n;
       });
       if (captured.length) {
-        // ReactFlow requires a parent to appear BEFORE its children in the nodes
-        // array. The captured nodes were created before this group, so move them
-        // right after it — otherwise the parentId is silently ignored (the bug).
-        const cap = new Set(captured);
-        const ordered = next.filter((n) => !cap.has(n.id));
-        const gi = ordered.findIndex((n) => n.id === grp.id);
-        ordered.splice(gi + 1, 0, ...next.filter((n) => cap.has(n.id)));
-        setNodes(ordered);
+        // Groups stay on the bottom layer; a non-group child follows its parent,
+        // which keeps ReactFlow's parent-before-child requirement satisfied.
+        setNodes(groupsToBottom(next));
         requestAnimationFrame(() => captured.forEach((id) => updateNodeInternals(id)));
       }
     },
@@ -425,7 +488,7 @@ export function Canvas() {
       }
 
       if (nextNodes) {
-        setNodes(nextNodes);
+        setNodes(groupsToBottom(nextNodes));
         // Refresh ReactFlow's cached absolute position after a parentId change,
         // otherwise the NEXT intersection test uses stale bounds and a re-drop
         // into a group is no longer detected (#2 — "se fix plus au groupe").
@@ -461,7 +524,12 @@ export function Canvas() {
         nodesConnectable={editable && !canvasLocked}
         elementsSelectable={editable}
         deleteKeyCode={editable && !canvasLocked ? ['Backspace', 'Delete'] : []}
+        onBeforeDelete={onBeforeDelete}
         proOptions={{ hideAttribution: false }}
+        zoomOnScroll={false}
+        zoomOnPinch
+        panOnScroll
+        panOnScrollMode={PanOnScrollMode.Free}
         panOnDrag
         selectionKeyCode="Shift"
         multiSelectionKeyCode={['Meta', 'Shift']}
