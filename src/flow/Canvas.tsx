@@ -6,7 +6,6 @@ import {
   BackgroundVariant,
   MiniMap,
   ConnectionMode,
-  PanOnScrollMode,
   MarkerType,
   useReactFlow,
   useUpdateNodeInternals,
@@ -478,10 +477,6 @@ export function Canvas() {
         deleteKeyCode={editable && !canvasLocked ? ['Backspace', 'Delete'] : []}
         onBeforeDelete={onBeforeDelete}
         proOptions={{ hideAttribution: false }}
-        zoomOnScroll={false}
-        zoomOnPinch
-        panOnScroll
-        panOnScrollMode={PanOnScrollMode.Free}
         panOnDrag
         selectionKeyCode="Shift"
         multiSelectionKeyCode={['Meta', 'Shift']}
