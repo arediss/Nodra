@@ -67,10 +67,16 @@ export function IconNode({ id, data, selected, width, height }: NodeProps<IconNo
   }
 
   return (
-    <div className={'ic-node-card' + (selected ? ' ic-node-selected' : '')}>
+    <div
+      className={
+        'ic-node-card' +
+        (data.frameless ? ' ic-node-frameless' : '') +
+        (selected ? ' ic-node-selected' : '')
+      }
+    >
       <NodeResizer
-        minWidth={76}
-        minHeight={76}
+        minWidth={data.frameless ? 32 : 76}
+        minHeight={data.frameless ? 32 : 76}
         isVisible={selected}
         color="var(--accent)"
       />

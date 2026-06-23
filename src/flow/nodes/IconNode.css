@@ -26,6 +26,34 @@
   box-shadow: 0 0 0 2px var(--accent), var(--shadow-card);
 }
 
+/* frameless icon: bare glyph + label, no card — matches a draw.io shape's
+   backgroundless icon, and drops the min-size so imported icons stay small. */
+.ic-node-card.ic-node-frameless {
+  background: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  min-width: 0;
+  min-height: 0;
+  gap: 2px;
+}
+.ic-node-card.ic-node-frameless:hover {
+  box-shadow: none;
+}
+.ic-node-card.ic-node-frameless.ic-node-selected {
+  box-shadow: none;
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius-sm);
+}
+.ic-node-frameless .ic-node-label {
+  max-width: 120px;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+  font-size: 11px;
+}
+
 .ic-node-glyph {
   display: flex;
   align-items: center;

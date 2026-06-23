@@ -28,6 +28,11 @@ import { useAppUpdate } from './lib/app-update';
 
 export default function App() {
   useEffect(() => {
+    // DEV affordance: expose the flow store so the canvas can be driven/inspected
+    // from the browser console (e.g. when debugging in Chrome). Stripped in prod.
+    if (import.meta.env.DEV) {
+      (globalThis as Record<string, unknown>).__flow = useFlowStore;
+    }
     useDocsStore.getState().init();
     maybeAutoJoin();
     // Check for an app update on launch (desktop only; self-noops on web).
