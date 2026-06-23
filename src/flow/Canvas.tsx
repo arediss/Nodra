@@ -70,6 +70,59 @@ export function Canvas() {
     if (tool !== 'connect') setPendingSource(null);
   }, [tool]);
 
+  // Tauri's macOS webview is WebKit, which delivers a trackpad PINCH as Safari
+  // `gesture*` events. d3-zoom/ReactFlow only listen to `wheel`, so pinch never
+  // zooms there (two-finger scroll pans via panOnScroll). Wire pinch -> zoom by
+  // hand: read the cumulative `scale` and zoom around the gesture point.
+  useEffect(() => {
+    const root = document.querySelector<HTMLElement>('.react-flow');
+    if (!root) return;
+    let base = 1;
+    const onStart = (e: Event) => {
+      e.preventDefault();
+      base = rf.getZoom();
+    };
+    const onChange = (e: Event) => {
+      e.preventDefault();
+      const g = e as Event & { scale: number; clientX: number; clientY: number };
+      const { x, y, zoom } = rf.getViewport();
+      const nz = Math.min(4, Math.max(0.2, base * g.scale));
+      const rect = root.getBoundingClientRect();
+      const px = g.clientX - rect.left;
+      const py = g.clientY - rect.top;
+      const k = nz / zoom;
+      rf.setViewport({ x: px - (px - x) * k, y: py - (py - y) * k, zoom: nz });
+    };
+    const onEnd = (e: Event) => e.preventDefault();
+    root.addEventListener('gesturestart', onStart);
+    root.addEventListener('gesturechange', onChange);
+    root.addEventListener('gestureend', onEnd);
+    return () => {
+      root.removeEventListener('gesturestart', onStart);
+      root.removeEventListener('gesturechange', onChange);
+      root.removeEventListener('gestureend', onEnd);
+    };
+  }, [rf]);
+
+  // Guaranteed keyboard zoom (⌘/Ctrl + +/-/0) — works regardless of trackpad.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.metaKey || e.ctrlKey) || e.altKey) return;
+      if (e.key === '=' || e.key === '+') {
+        e.preventDefault();
+        void rf.zoomIn();
+      } else if (e.key === '-' || e.key === '_') {
+        e.preventDefault();
+        void rf.zoomOut();
+      } else if (e.key === '0') {
+        e.preventDefault();
+        void rf.zoomTo(1);
+      }
+    };
+    globalThis.addEventListener('keydown', onKey);
+    return () => globalThis.removeEventListener('keydown', onKey);
+  }, [rf]);
+
   // While a connection is being dragged, reveal every block's handles so you can
   // see where the cable can land (#6).
   const [drawingEdge, setDrawingEdge] = useState(false);
